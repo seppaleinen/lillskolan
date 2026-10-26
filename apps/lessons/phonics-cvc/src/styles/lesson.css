@@ -1,0 +1,128 @@
+/**
+ * Lesson styles - child-friendly design for phonics-cvc lesson.
+ * Tablet-first responsive layout.
+ */
+
+/* Lesson container */
+.lesson-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+  background: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Header */
+.lesson-container h1 {
+  font-size: 2rem;
+  color: #4a90d9;
+  margin-bottom: 0.5rem;
+}
+
+/* Word display */
+.word-display {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #333;
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Pass indicator */
+.pass-indicator {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+/* Phoneme grid */
+.phoneme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 1rem auto;
+}
+
+/* Phoneme tile */
+.phoneme-tile {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f4f8;
+  border: 2px solid #d0dae5;
+  border-radius: 12px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.phoneme-tile:hover {
+  background: #e0e8f0;
+}
+
+.phoneme-tile:active,
+.phoneme-tile.active {
+  transform: scale(0.92);
+  background: #4a90d9;
+  color: white;
+  border-color: #3a7bc8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Navigation */
+.nav-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.nav-container button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #4a90d9;
+  color: white;
+  transition: background 0.15s ease;
+}
+
+.nav-container button:hover:not(:disabled) {
+  background: #3a7bc8;
+}
+
+.nav-container button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Tablet optimization */
+@media (min-width: 768px) {
+  .phoneme-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .phoneme-tile {
+    font-size: 2.5rem;
+  }
+
+  .word-display {
+    font-size: 4rem;
+  }
+}
