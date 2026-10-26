@@ -1,0 +1,14 @@
+{
+  "name": "lillskolan-hub",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lillskolan/lesson-sdk": "workspace:*"
+  }
+}

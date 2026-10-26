@@ -1,0 +1,1 @@
+export const LESSON_EVENTS = ["LESSON_PROGRESS", "LESSON_COMPLETE"] as const;
