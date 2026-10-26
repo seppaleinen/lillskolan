@@ -1,0 +1,1 @@
+export const HUB_ORIGIN = "http://localhost:5173";
