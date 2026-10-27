@@ -169,7 +169,7 @@ function showLesson(container: HTMLElement): void {
   advanceButton.style.borderRadius = '12px';
   advanceButton.style.cursor = 'pointer';
   advanceButton.style.touchAction = 'none';
-  advanceButton.style.marginTop = '1rem';
+  advanceButton.style.marginTop = '0.5rem';
   container.appendChild(advanceButton);
 
   // Drag session — hit-tests the glider on drop.
