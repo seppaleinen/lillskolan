@@ -86,9 +86,30 @@ Lektionen använder **WebAudio API** för att spela upp fonemklipp. Just nu är 
 
 Se [issue #7](https://github.com/seppaleinen/lillskolan/issues/7) för att byta ut mot riktig TTS-genererade och handklippta fonem.
 
-## 📦 Docker (kommande)
+## 📦 Docker
 
-Just nu körs projektet lokalt med `pnpm dev`. Ett Docker Compose-setup är önskat för enklare distribution. Se [issue #8](https://github.com/seppaleinen/lillskolan/issues/8).
+### Utveckling
+
+Starta utvecklingsmiljön med Docker Compose:
+
+```bash
+docker compose up
+```
+
+- **Hub:** http://localhost:5173 (innehåller en inbäddad iframe till lektionen)
+- **Lektion (fristående):** http://localhost:5174
+
+### Produktion
+
+Bygg och starta produktionsmiljön:
+
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
+
+Applikationen serveras via Nginx på port 80.
+
+Se [issue #8](https://github.com/seppaleinen/lillskolan/issues/8) för detaljer om Docker-setupen.
 
 ## 🧪 Testning
 

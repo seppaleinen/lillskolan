@@ -11,7 +11,7 @@ export const lessons: LessonConfig[] = [
     name: 'Fonetik CVC',
     description: 'Lär dig läsa enkla ord med konsonant-vokal-konsonant',
     origin: LESSON_ORIGIN,
-    entry: '/',
+    entry: import.meta.env.VITE_LESSON_ENTRY || '/',
     accentColor: '#4A90D9',
     icon: '📖',
     estimatedSteps: 8,
