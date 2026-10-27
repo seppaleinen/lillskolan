@@ -4,8 +4,10 @@ import path from 'path';
 export default defineConfig({
   server: {
     port: 5174,
-    strictPort: true
+    strictPort: true,
+    host: true
   },
+  base: process.env.NODE_ENV === 'production' ? '/lesson/' : '/',
   build: {
     rollupOptions: {
       input: {
