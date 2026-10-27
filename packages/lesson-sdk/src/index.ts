@@ -58,7 +58,12 @@ export class LessonBridge {
     this.allowedOrigins = options.allowedOrigins ?? [];
     this.devMode = options.devMode ?? false;
 
-    if (typeof window !== "undefined" && !this.isStandalone()) {
+    // Attach listener if we have allowedOrigins (hub mode, needs to receive)
+    // OR if we're in an iframe (lesson mode).
+    // The standalone check only prevents listener attachment when there's
+    // no parent to receive from AND we're not a hub.
+    const isHub = this.allowedOrigins.length > 0;
+    if (typeof window !== "undefined" && (!this.isStandalone() || isHub)) {
       this.attachListener();
     }
   }
