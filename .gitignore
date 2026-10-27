@@ -6,3 +6,4 @@ coverage
 *.local
 *.tsbuildinfo
 dev.pid
+apps/**/.env
