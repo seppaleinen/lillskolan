@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.prod
       args:
         - VITE_HUB_ORIGIN=${VITE_HUB_ORIGIN:-https://lillskolan.se}
-        - VITE_LESSON_ORIGIN=${VITE_LESSON_ORIGIN:-https://lillskolan.se/lesson}
-        - VITE_LESSON_ENTRY=${VITE_LESSON_ENTRY:-/}
+        - VITE_LESSON_ORIGIN=${VITE_LESSON_ORIGIN:-https://lillskolan.se}
+        - VITE_LESSON_ENTRY=${VITE_LESSON_ENTRY:-/lesson/}
     ports:
       - "80:80"
