@@ -88,6 +88,13 @@ Se [issue #7](https://github.com/seppaleinen/lillskolan/issues/7) för att byta 
 
 ## 📦 Docker
 
+### Tjänster
+
+Docker Compose-setupen innehåller:
+
+- **app** - Node.js-utvecklingsmiljö som kör `pnpm dev` för både Hub (port 5173) och lektionsappen (port 5174). Mönstrar källkoden och använder `.env`-filer genererade från miljövariabler via `docker-entrypoint.sh`.
+- **Nginx** (produktion) - Statisk filserver som betjänar byggda tillgångar från `/usr/share/nginx/html/`. Hub servas på `/` och lektionen på `/lesson/` med SPA-fallback.
+
 ### Utveckling
 
 Starta utvecklingsmiljön med Docker Compose:
@@ -107,7 +114,19 @@ Bygg och starta produktionsmiljön:
 docker compose -f docker-compose.prod.yml up --build
 ```
 
-Applikationen serveras via Nginx på port 80.
+Applikationen serveras via Nginx på port 80. Miljövariabler kan konfigureras via `.env`-fil eller direkt:
+
+- `VITE_HUB_ORIGIN` - Ursprung för Hub (standard: https://lillskolan.se)
+- `VITE_LESSON_ORIGIN` - Ursprung för lektionen (standard: https://lillskolan.se)
+- `VITE_LESSON_ENTRY` - Sökvägs-prefix för lektionen (standard: /lesson/)
+
+### Testning
+
+Kör tester i Docker-miljön:
+
+```bash
+docker compose run --rm app pnpm test
+```
 
 Se [issue #8](https://github.com/seppaleinen/lillskolan/issues/8) för detaljer om Docker-setupen.
 
