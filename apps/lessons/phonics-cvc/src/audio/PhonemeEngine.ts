@@ -7,8 +7,8 @@ import { PhonemeManifest } from '../types/phoneme-manifest';
 export interface PhonemeEngine {
   /** Load manifest and fetch/decode all clip WAV files. */
   load(manifest: PhonemeManifest): Promise<void>;
-  /** Play a clip by ID. Optional playbackRate overrides global rate. */
-  play(clipId: string, playbackRate?: number): void;
+  /** Play a clip by ID. Optional playbackRate overrides global rate. Returns Promise that resolves when clip ends. */
+  play(clipId: string, playbackRate?: number): Promise<void>;
   /** Set global playback rate (clamped 0.1–4.0). Affects future plays. */
   setPlaybackRate(value: number): void;
   /** Get current global playback rate. */
@@ -64,8 +64,8 @@ export class WebAudioPhonemeEngine implements PhonemeEngine {
     this.ready = true;
   }
 
-  /** Play a clip. Creates a new source node each call. */
-  play(clipId: string, playbackRate?: number): void {
+  /** Play a clip. Creates a new source node each call. Returns a Promise that resolves when playback ends. */
+  play(clipId: string, playbackRate?: number): Promise<void> {
     if (!this.ready) {
       throw new Error('PhonemeEngine not ready. Call load() first.');
     }
@@ -85,11 +85,28 @@ export class WebAudioPhonemeEngine implements PhonemeEngine {
 
     // Track source for stop()/destroy()
     this.activeSources.add(source);
+
+    // Create a promise that resolves when the source ends.
+    // onended is assigned before start() to avoid missing the event.
+    let resolveFn: () => void;
+    const ended = new Promise<void>((resolve) => {
+      resolveFn = resolve;
+    });
     source.onended = () => {
       this.activeSources.delete(source);
+      resolveFn();
     };
 
-    source.start();
+    // start() throws synchronously on invalid state — keep that synchronous
+    // so existing callers' try/catch still catches it.
+    try {
+      source.start();
+    } catch (err) {
+      this.activeSources.delete(source);
+      throw err;
+    }
+
+    return ended;
   }
 
   /** Set global playback rate, clamped to [0.1, 4.0]. */
