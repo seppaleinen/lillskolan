@@ -25,7 +25,7 @@ export async function playBlended(
 
   try {
     for (const chunk of chunks) {
-      engine.play(chunk.clip);
+      await engine.play(chunk.clip);
       await delayForClip(chunk, rate);
     }
   } finally {

@@ -3,27 +3,43 @@ import { playBlended } from '../audio/BlendPlayer';
 import type { PhonemeEngine } from '../audio/PhonemeEngine';
 import type { PhonemeChunk } from '../types/phoneme-manifest';
 
-function makeMockEngine(ready = true): PhonemeEngine & {
+function makeMockEngine(ready = true, autoResolve = true): PhonemeEngine & {
   playCalls: string[];
   rateCalls: number[];
   currentRate: number;
+  resolveNext: () => void;
+  getPendingCount: () => number;
 } {
   const playCalls: string[] = [];
   const rateCalls: number[] = [];
   let currentRate = 1;
+  const pendingResolves: Array<() => void> = [];
 
   return {
     playCalls,
     rateCalls,
     get currentRate() { return currentRate; },
     isReady: () => ready,
-    play: (clipId: string) => { playCalls.push(clipId); },
+    play: (clipId: string) => {
+      playCalls.push(clipId);
+      if (autoResolve) {
+        return Promise.resolve();
+      }
+      return new Promise<void>((resolve) => {
+        pendingResolves.push(resolve);
+      });
+    },
+    resolveNext: () => {
+      const resolve = pendingResolves.shift();
+      if (resolve) resolve();
+    },
+    getPendingCount: () => pendingResolves.length,
     setPlaybackRate: (v: number) => { rateCalls.push(v); currentRate = v; },
     getPlaybackRate: () => currentRate,
     stop: () => {},
     destroy: () => {},
     load: async () => {},
-  } as unknown as PhonemeEngine & { playCalls: string[]; rateCalls: number[]; currentRate: number };
+  } as unknown as PhonemeEngine & { playCalls: string[]; rateCalls: number[]; currentRate: number; resolveNext: () => void; getPendingCount: () => number };
 }
 
 const chunks: PhonemeChunk[] = [
@@ -84,5 +100,47 @@ describe('playBlended', () => {
       return Promise.resolve();
     });
     expect(delayCalls).toEqual(chunks);
+  });
+
+  it('awaits play() Promise resolution before playing next chunk', async () => {
+    const engine = makeMockEngine(true, false);
+    const testChunks = [
+      { text: 'a', clip: 'a' },
+      { text: 'b', clip: 'b' },
+      { text: 'c', clip: 'c' },
+    ];
+
+    // Start playback without awaiting
+    const playbackPromise = playBlended(engine, testChunks, 0.85);
+    
+    // First chunk should have been called, but second shouldn't yet
+    expect(engine.playCalls).toEqual(['a']);
+    expect(engine.getPendingCount()).toBe(1);
+    
+    // Resolve first clip
+    engine.resolveNext();
+    // Wait for the microtask queue to process
+    await Promise.resolve();
+    await Promise.resolve();
+    
+    // Now second clip should be called
+    expect(engine.playCalls).toEqual(['a', 'b']);
+    expect(engine.getPendingCount()).toBe(1);
+    
+    // Resolve second clip
+    engine.resolveNext();
+    await Promise.resolve();
+    await Promise.resolve();
+    
+    // Now third clip should be called
+    expect(engine.playCalls).toEqual(['a', 'b', 'c']);
+    expect(engine.getPendingCount()).toBe(1);
+    
+    // Resolve third clip
+    engine.resolveNext();
+    await playbackPromise;
+    
+    // All done
+    expect(engine.playCalls).toEqual(['a', 'b', 'c']);
   });
 });
