@@ -224,3 +224,65 @@
     min-height: 100px;
   }
 }
+
+/* Celebration - confetti and shooting stars */
+.celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.celebration .star {
+  position: absolute;
+  left: var(--star-x);
+  top: var(--star-y);
+  width: 12px;
+  height: 12px;
+  background: var(--star-color);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--star-color), 0 0 16px var(--star-color);
+  animation: star-fly var(--star-duration) ease-out var(--star-delay) forwards;
+  opacity: 0;
+}
+
+.celebration .confetti {
+  position: absolute;
+  left: var(--confetti-x);
+  top: -20px;
+  width: 10px;
+  height: 10px;
+  background: var(--confetti-color);
+  animation: confetti-fall var(--confetti-duration) ease-out var(--confetti-delay) forwards;
+  opacity: 0;
+  transform: rotate(var(--confetti-rotation));
+}
+
+@keyframes star-fly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(150px, 150px) scale(0.5);
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--confetti-rotation));
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(calc(var(--confetti-rotation) + 720deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebration {
+    display: none;
+  }
+}
