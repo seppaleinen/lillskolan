@@ -25,6 +25,9 @@ export function createDragSession(opts: DragSessionOptions): DragSession {
   let ghost: HTMLElement | null = null;
   let ghostText = '';
   let pointerId: number | null = null;
+  let pointerStartX = 0;
+  let pointerStartY = 0;
+  const DRAG_THRESHOLD = 8;
 
   function makeGhost(text: string): HTMLElement {
     const g = document.createElement('div');
@@ -67,6 +70,8 @@ export function createDragSession(opts: DragSessionOptions): DragSession {
     activeTileIndex = tileIndex;
     dragStarted = false;
     pointerId = e.pointerId;
+    pointerStartX = e.clientX;
+    pointerStartY = e.clientY;
 
     // Resolve chunk text from the tile element.
     const tileEl = target?.closest('[data-tile-index]') as HTMLElement | null;
@@ -85,7 +90,12 @@ export function createDragSession(opts: DragSessionOptions): DragSession {
 
   function onPointerMove(e: PointerEvent): void {
     if (activeTileIndex === null) return;
+    if (pointerId !== null && e.pointerId !== pointerId) return;
     if (!dragStarted) {
+      const dx = e.clientX - pointerStartX;
+      const dy = e.clientY - pointerStartY;
+      const distance = Math.hypot(dx, dy);
+      if (distance < DRAG_THRESHOLD) return;
       dragStarted = true;
       ghost = makeGhost(ghostText);
     }

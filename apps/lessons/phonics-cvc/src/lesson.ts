@@ -96,6 +96,20 @@ function showLesson(container: HTMLElement): void {
   const wordDisplay = document.createElement('div');
   wordDisplay.className = 'word-display';
   container.appendChild(wordDisplay);
+  wordDisplay.style.cursor = 'pointer';
+  wordDisplay.addEventListener('click', async () => {
+    if (!machine || !audioEngine || !audioEngine.isReady()) return;
+    const stepState = machine.getCurrentStep();
+    try {
+      audioEngine.stop();
+      statusLine.textContent = 'Läser ordet…';
+      await playBlended(audioEngine, stepState.chunks, 0.85);
+    } catch {
+      // Ignore playback errors
+    } finally {
+      statusLine.textContent = '';
+    }
+  });
 
   // Pass indicator
   const passIndicator = document.createElement('div');
@@ -126,6 +140,17 @@ function showLesson(container: HTMLElement): void {
     },
     onDragEnd: () => {
       glider.setActiveSlot(null);
+    },
+    onTileClick: (tileIndex) => {
+      if (!audioEngine?.isReady() || !machine) return;
+      const chunk = machine.getCurrentStep().chunks[tileIndex];
+      if (!chunk) return;
+      try {
+        audioEngine.stop();
+        audioEngine.play(chunk.clip);
+      } catch {
+        // Ignore missing clip
+      }
     },
   });
   container.appendChild(tray.element);
@@ -219,7 +244,7 @@ function showLesson(container: HTMLElement): void {
     syncStepUI();
   }
 
-  async function onStepComplete(): void {
+  async function onStepComplete(): Promise<void> {
     if (!machine || !audioEngine || advancing) return;
     advancing = true;
 
@@ -231,6 +256,7 @@ function showLesson(container: HTMLElement): void {
     if (audioEngine.isReady()) {
       statusLine.textContent = 'Läser ordet…';
       try {
+        audioEngine.stop();
         await playBlended(audioEngine, stepState.chunks, 0.85);
       } catch {
         // Blend failed — continue regardless.
@@ -300,41 +326,8 @@ function showLesson(container: HTMLElement): void {
   });
 
   function rebuildTray(chunks: PhonemeChunk[]): void {
-    // Replace the tray in place: destroy old tiles, create new ones.
-    tray.element.innerHTML = '';
-    chunks.forEach((chunk, index) => {
-      const tile = document.createElement('div');
-      tile.className = 'chunk-tile';
-      tile.setAttribute('data-tile-index', String(index));
-      tile.textContent = chunk.text;
-      tile.style.minWidth = '88px';
-      tile.style.minHeight = '88px';
-      tile.style.display = 'flex';
-      tile.style.alignItems = 'center';
-      tile.style.justifyContent = 'center';
-      tile.style.background = '#fff';
-      tile.style.border = '2px solid #4a90d9';
-      tile.style.borderRadius = '12px';
-      tile.style.fontSize = '1.5rem';
-      tile.style.fontWeight = 'bold';
-      tile.style.color = '#333';
-      tile.style.cursor = 'grab';
-      tile.style.touchAction = 'none';
-
-      const onPointerDown = (e: PointerEvent): void => {
-        e.preventDefault();
-        tray.setDragging(index, true);
-      };
-      tile.addEventListener('pointerdown', onPointerDown);
-
-      // Reset dragging state on pointer up (in case drop landed elsewhere).
-      document.addEventListener('pointerup', function release() {
-        document.removeEventListener('pointerup', release);
-        tray.setDragging(index, false);
-      });
-
-      tray.element.appendChild(tile);
-    });
+    // Replace the tray in place using ChunkTray's update method
+    tray.update(chunks);
   }
 
   // Initial sync.
