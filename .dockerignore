@@ -1,0 +1,11 @@
+node_modules
+dist
+test-results
+.git
+*.log
+dev.pid
+*.tsbuildinfo
+coverage
+.env
+*.md
+.github

@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Enable corepack for pnpm
+RUN corepack enable
+
+# Copy package files first for caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/hub/package.json ./apps/hub/
+COPY apps/lessons/phonics-cvc/package.json ./apps/lessons/phonics-cvc/
+COPY packages/lesson-sdk/package.json ./packages/lesson-sdk/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Entrypoint to write per-app .env files from environment variables
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["pnpm", "dev"]
