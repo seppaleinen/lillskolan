@@ -41,88 +41,183 @@
 .pass-indicator {
   font-size: 1.2rem;
   color: #666;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-/* Phoneme grid */
-.phoneme-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 1rem;
+/* Step counter */
+.step-counter {
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+}
+
+/* Status line (blend status etc.) */
+.lesson-status {
+  font-size: 1.1rem;
+  color: #4a90d9;
+  min-height: 1.2em;
+  margin-bottom: 0.5rem;
+}
+
+/* Sound glider */
+.sound-glider {
   width: 100%;
   max-width: 400px;
   margin: 1rem auto;
 }
 
-/* Phoneme tile */
-.phoneme-tile {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f4f8;
-  border: 2px solid #d0dae5;
-  border-radius: 12px;
-  font-size: 2rem;
-  font-weight: bold;
-  color: #333;
-  cursor: pointer;
-  transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.glider-slot {
+  flex: 0 0 auto;
 }
 
-.phoneme-tile:hover {
-  background: #e0e8f0;
+.glider-slot.active {
+  border-color: #f1c40f;
+  box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.3);
 }
 
-.phoneme-tile:active,
-.phoneme-tile.active {
-  transform: scale(0.92);
+.glider-slot.filled {
   background: #4a90d9;
-  color: white;
-  border-color: #3a7bc8;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: #fff;
+  border-color: #4a90d9;
 }
 
-/* Navigation */
-.nav-container {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
+/* Chunk tray */
+.chunk-tray {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border-top: 2px solid #e0e0e0;
+  z-index: 100;
 }
 
-.nav-container button {
+.chunk-tile {
+  flex: 0 0 auto;
+}
+
+.chunk-tile.unavailable {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.chunk-tile.dragging {
+  transform: scale(1.05);
+}
+
+/* Shake animation for wrong drops */
+.shake {
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+
+/* Drag ghost */
+.drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2000;
+  transform: translate(-50%, -120%);
+}
+
+/* Advance button */
+.btn-step {
   padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #4a90d9;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
   color: white;
+  background: #4a90d9;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  touch-action: none;
   transition: background 0.15s ease;
 }
 
-.nav-container button:hover:not(:disabled) {
+.btn-step:hover:not(:disabled) {
   background: #3a7bc8;
 }
 
-.nav-container button:disabled {
+.btn-step:disabled {
   background: #ccc;
   cursor: not-allowed;
 }
 
+/* Completion screen */
+.completion-screen {
+  font-family: inherit;
+}
+
+.completion-heading {
+  font-size: 2rem;
+  color: #27ae60;
+  margin-bottom: 0.5rem;
+}
+
+.completion-subtitle {
+  font-size: 1.3rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.completion-stars {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.completion-stars-label {
+  margin-top: 0.25rem;
+  color: #666;
+}
+
+.completion-line {
+  font-size: 1.1rem;
+  color: #444;
+  margin: 0.25rem 0;
+}
+
+.completion-back {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: inherit;
+  color: white;
+  background: #4a90d9;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  touch-action: none;
+  margin-top: 1.5rem;
+  transition: background 0.15s ease;
+}
+
+.completion-back:hover {
+  background: #3a7bc8;
+}
+
 /* Tablet optimization */
 @media (min-width: 768px) {
-  .phoneme-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .phoneme-tile {
-    font-size: 2.5rem;
-  }
-
   .word-display {
     font-size: 4rem;
+  }
+
+  .glider-slot {
+    min-width: 100px;
+    min-height: 100px;
+  }
+
+  .chunk-tile {
+    min-width: 100px;
+    min-height: 100px;
   }
 }
