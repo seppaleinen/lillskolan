@@ -1,148 +1,396 @@
 /**
- * Lesson page - main entry point for phonics-cvc lesson.
- * Integrates TapToStart gate, phoneme grid, and audio engine.
+ * Lesson page - main entry point for the phonics-cvc lesson.
+ *
+ * Flow:
+ * 1. Create WebAudioPhonemeEngine, load manifest, show TapToStartGate.
+ * 2. On start: engine.load, record start time, remove gate, build lesson UI.
+ * 3. Lesson UI: header, word display, pass indicator, step counter,
+ *    SoundGlider, ChunkTray, advance button.
+ * 4. Drag tiles from tray to glider slots; wrong drops shake the tile.
+ * 5. On step complete: blended playback + bridge progress event.
+ * 6. On final step complete: CompletionScreen + bridge sendComplete.
+ * 7. pagehide / visibilitychange → cleanup (engine, DOM, bridge).
+ *
  * All content in Swedish.
  */
 
 import { createTapToStartGate } from './components/TapToStartGate';
-import { createPhonemeGrid } from './components/PhonemeGrid';
+import { createSoundGlider } from './components/SoundGlider';
+import { createChunkTray } from './components/ChunkTray';
+import { createCompletionScreen } from './components/CompletionScreen';
+import { createDragSession } from './drag/DragSession';
 import { WebAudioPhonemeEngine } from './audio/PhonemeEngine';
-import type { PhonemeManifest, PhonemeWord, PhonemeChunk, PhonemePass } from './types/phoneme-manifest';
+import { playBlended } from './audio/BlendPlayer';
+import { createLessonMachine, type LessonMachine } from './state/lesson-machine';
+import { getLessonBridge, destroyLessonBridge } from './bridge';
+import { createReturnMessage } from './return-protocol';
+import { HUB_ORIGIN } from './config';
+import type { PhonemeManifest, PhonemeChunk } from './types/phoneme-manifest';
 
-let currentWordIndex = 0;
-let currentPass = 1; // 1 = onset+rim, 2 = onset+vowel+coda
 let audioEngine: WebAudioPhonemeEngine | null = null;
 let manifest: PhonemeManifest | null = null;
+let machine: LessonMachine | null = null;
+let lessonStartTime = 0;
+let lessonRoot: HTMLElement | null = null;
+let lessonDestroyed = false;
+let cleanupWired = false;
 
 /**
  * Render the lesson page into a container element.
  */
 export function renderLesson(container: HTMLElement): void {
-  // Initialize audio engine
-  audioEngine = new WebAudioPhonemeEngine();
+  // Fresh module state on every render.
+  lessonDestroyed = false;
+  cleanupWired = false;
+  pendingComponentCleanups = [];
 
-  // Load manifest
-  loadManifest().then(() => {
-    // Show tap-to-start gate
-    const gate = createTapToStartGate(async () => {
-      // On first tap: load audio engine, remove gate, show lesson
-      if (audioEngine && manifest) {
-        await audioEngine.load(manifest);
-      }
-      gate.remove();
-      showLesson(container);
+  audioEngine = new WebAudioPhonemeEngine();
+  lessonRoot = container;
+
+  loadManifest()
+    .then(() => {
+      if (lessonDestroyed) return;
+      const gate = createTapToStartGate(async () => {
+        if (lessonDestroyed) return;
+        if (audioEngine && manifest) {
+          await audioEngine.load(manifest);
+        }
+        lessonStartTime = performance.now();
+        gate.remove();
+        showLesson(container);
+      });
+      container.appendChild(gate.element);
+    })
+    .catch((error) => {
+      console.error('[lesson] Failed to load manifest:', error);
     });
-    container.appendChild(gate.element);
-  });
 }
 
 /**
  * Load the phoneme manifest from public.
  */
-async function loadManifest(): Promise<void> {
+async function loadManifest(): Promise<PhonemeManifest> {
   const response = await fetch('/manifest/phoneme-manifest.json');
-  manifest = await response.json();
+  manifest = (await response.json()) as PhonemeManifest;
+  return manifest;
 }
 
 /**
  * Show the lesson UI after tap-to-start is complete.
  */
 function showLesson(container: HTMLElement): void {
+  if (!manifest || !audioEngine) return;
+
+  machine = createLessonMachine(manifest);
+
   container.innerHTML = '';
   container.className = 'lesson-container';
 
   // Header
   const header = document.createElement('h1');
+  header.className = 'lesson-header';
   header.textContent = 'Läsläs: CVC';
   container.appendChild(header);
 
   // Word display
   const wordDisplay = document.createElement('div');
   wordDisplay.className = 'word-display';
-  wordDisplay.textContent = getCurrentWord().id;
   container.appendChild(wordDisplay);
 
   // Pass indicator
   const passIndicator = document.createElement('div');
   passIndicator.className = 'pass-indicator';
-  passIndicator.textContent = `Omgång ${currentPass} av 2`;
   container.appendChild(passIndicator);
 
-  // Phoneme grid - map new manifest format to component format (clipId)
-  const word = getCurrentWord();
-  const passChunks: PhonemeChunk[] = currentPass === 1 ? word.passes[0].chunks : word.passes[1].chunks;
-  const chunks = passChunks.map(chunk => ({ text: chunk.text, clipId: chunk.clip }));
+  // Step counter
+  const stepCounter = document.createElement('div');
+  stepCounter.className = 'step-counter';
+  container.appendChild(stepCounter);
 
-  const grid = createPhonemeGrid(chunks, handlePlayClip);
-  container.appendChild(grid);
+  // Status line (blend status etc.)
+  const statusLine = document.createElement('div');
+  statusLine.className = 'lesson-status';
+  statusLine.setAttribute('aria-live', 'polite');
+  container.appendChild(statusLine);
 
-  // Navigation
-  const navContainer = document.createElement('div');
-  navContainer.className = 'nav-container';
+  // Glider
+  const step = machine.getCurrentStep();
+  const glider = createSoundGlider(step.chunks, { onDrop: () => {} });
+  container.appendChild(glider.element);
 
-  const prevButton = document.createElement('button');
-  prevButton.textContent = 'Föregående';
-  prevButton.disabled = currentWordIndex === 0;
-  prevButton.onclick = handlePrevious;
-  navContainer.appendChild(prevButton);
+  // Tray
+  const tray = createChunkTray(step.chunks, {
+    onDragStart: (tileIndex) => {
+      tray.setDragging(tileIndex, true);
+      glider.setActiveSlot(firstEmptySlot());
+    },
+    onDragEnd: () => {
+      glider.setActiveSlot(null);
+    },
+  });
+  container.appendChild(tray.element);
 
-  const nextButton = document.createElement('button');
-  nextButton.textContent = 'Nästa';
-  nextButton.onclick = handleNext;
-  navContainer.appendChild(nextButton);
+  // Advance button
+  const advanceButton = document.createElement('button');
+  advanceButton.className = 'btn-step';
+  advanceButton.style.minWidth = '88px';
+  advanceButton.style.minHeight = '88px';
+  advanceButton.style.padding = '0.75rem 1.5rem';
+  advanceButton.style.fontSize = '1.1rem';
+  advanceButton.style.fontWeight = 'bold';
+  advanceButton.style.color = 'white';
+  advanceButton.style.background = '#4a90d9';
+  advanceButton.style.border = 'none';
+  advanceButton.style.borderRadius = '12px';
+  advanceButton.style.cursor = 'pointer';
+  advanceButton.style.touchAction = 'none';
+  advanceButton.style.marginTop = '1rem';
+  container.appendChild(advanceButton);
 
-  container.appendChild(navContainer);
-}
+  // Drag session — hit-tests the glider on drop.
+  const dragSession = createDragSession({
+    root: container,
+    getDraggable: (el) => {
+      if (!el) return null;
+      const tile = (el as Element).closest?.('[data-tile-index]') as HTMLElement | null;
+      if (!tile || !tray.element.contains(tile)) return null;
+      const index = Number(tile.getAttribute('data-tile-index'));
+      // Ignore tiles that are no longer available (already dropped).
+      if (tile.classList.contains('unavailable')) return null;
+      return Number.isNaN(index) ? null : index;
+    },
+    onDrop: (tileIndex, x, y) => {
+      handleDrop(tileIndex, x, y);
+    },
+  });
 
-/**
- * Get the current word from the manifest.
- */
-function getCurrentWord(): PhonemeWord {
-  if (!manifest || manifest.words.length === 0) {
-    throw new Error('Inget manifest laddat');
+  function firstEmptySlot(): number | null {
+    const m = machine as LessonMachine;
+    const filled = m.getCurrentStep().filled;
+    const idx = filled.findIndex((f) => f.chunk === null);
+    return idx === -1 ? null : idx;
   }
-  return manifest.words[currentWordIndex];
+
+  let advancing = false;
+
+  function syncStepUI(): void {
+    if (!machine) return;
+    const stepState = machine.getCurrentStep();
+    const isFinalStep = machine.getStepIndex() === machine.getTotalSteps() - 1;
+
+    wordDisplay.textContent = stepState.wordId;
+    passIndicator.textContent = `Omgång ${stepState.pass} av 2`;
+    stepCounter.textContent = `Steg ${stepState.stepIndex + 1} av ${machine.getTotalSteps()}`;
+    advanceButton.textContent = isFinalStep ? 'Avsluta →' : 'Nästa ord →';
+    advanceButton.disabled = !machine.isStepComplete();
+  }
+
+  function handleDrop(tileIndex: number, clientX: number, clientY: number): void {
+    if (!machine || advancing) return;
+
+    const slotEl = document.elementFromPoint(clientX, clientY)?.closest('[data-slot-index]');
+    if (!slotEl) return;
+
+    const result = machine.dropTile(tileIndex);
+    if (result.ok) {
+      const droppedChunk = machine.getCurrentStep().chunks[tileIndex];
+      glider.markSlotFilled(tileIndex, droppedChunk);
+      tray.setAvailable(tileIndex, false);
+      if (audioEngine?.isReady()) {
+        try {
+          audioEngine.play(droppedChunk.clip);
+        } catch {
+          // Clip missing — ignore.
+        }
+      }
+
+      if (machine.isStepComplete()) {
+        onStepComplete();
+      }
+    } else {
+      // Wrong tile: shake the tray tile, no audio, no lock.
+      const tileEl = tray.element.querySelector<HTMLElement>(`[data-tile-index="${tileIndex}"]`);
+      if (tileEl) {
+        tileEl.classList.add('shake');
+        window.setTimeout(() => tileEl.classList.remove('shake'), 300);
+      }
+      glider.setActiveSlot(result.expected);
+    }
+    syncStepUI();
+  }
+
+  async function onStepComplete(): void {
+    if (!machine || !audioEngine || advancing) return;
+    advancing = true;
+
+    const stepState = machine.getCurrentStep();
+    const completedCount = machine.getStepIndex() + 1; // 1-based
+    const isFinalStep = machine.getStepIndex() === machine.getTotalSteps() - 1;
+
+    // Blended playback at slow rate.
+    if (audioEngine.isReady()) {
+      statusLine.textContent = 'Läser ordet…';
+      try {
+        await playBlended(audioEngine, stepState.chunks, 0.85);
+      } catch {
+        // Blend failed — continue regardless.
+      }
+    }
+
+    statusLine.textContent = '';
+    advanceButton.disabled = false;
+
+    getLessonBridge().sendProgress({
+      stepIndex: completedCount,
+      totalSteps: machine.getTotalSteps(),
+      accuracy: machine.getStepAccuracy(),
+    });
+
+    if (isFinalStep) {
+      showCompletion();
+    }
+
+    advancing = false;
+  }
+
+  function showCompletion(): void {
+    if (!machine || !lessonRoot) return;
+
+    const stars = machine.getStars();
+    const accuracyPercent = Math.round(machine.getAverageAccuracy() * 100);
+    const timeMs = performance.now() - lessonStartTime;
+
+    lessonRoot.innerHTML = '';
+    const screen = createCompletionScreen({
+      stars,
+      accuracyPercent,
+      timeMs,
+      onBackToHub: () => {
+        try {
+          window.parent.postMessage(createReturnMessage(), HUB_ORIGIN);
+        } catch {
+          // Standalone or cross-origin guard — stay on the screen.
+        }
+      },
+    });
+    lessonRoot.appendChild(screen.element);
+
+    getLessonBridge().sendComplete({
+      stars,
+      completionTimeMs: Math.round(performance.now() - lessonStartTime),
+      summary: `Du läste alla 8 ord! ${stars} av 3 stjärnor.`,
+    });
+  }
+
+  advanceButton.addEventListener('click', () => {
+    if (!machine || advancing) return;
+    const advanced = machine.nextStep();
+    if (!advanced) {
+      // Should not happen — completion is shown at final step completion.
+      return;
+    }
+    const newStep = machine.getCurrentStep();
+    wordDisplay.textContent = newStep.wordId;
+    passIndicator.textContent = `Omgång ${newStep.pass} av 2`;
+    stepCounter.textContent = `Steg ${newStep.stepIndex + 1} av ${machine.getTotalSteps()}`;
+    statusLine.textContent = '';
+    glider.renderStep(newStep.chunks);
+    rebuildTray(newStep.chunks);
+    syncStepUI();
+  });
+
+  function rebuildTray(chunks: PhonemeChunk[]): void {
+    // Replace the tray in place: destroy old tiles, create new ones.
+    tray.element.innerHTML = '';
+    chunks.forEach((chunk, index) => {
+      const tile = document.createElement('div');
+      tile.className = 'chunk-tile';
+      tile.setAttribute('data-tile-index', String(index));
+      tile.textContent = chunk.text;
+      tile.style.minWidth = '88px';
+      tile.style.minHeight = '88px';
+      tile.style.display = 'flex';
+      tile.style.alignItems = 'center';
+      tile.style.justifyContent = 'center';
+      tile.style.background = '#fff';
+      tile.style.border = '2px solid #4a90d9';
+      tile.style.borderRadius = '12px';
+      tile.style.fontSize = '1.5rem';
+      tile.style.fontWeight = 'bold';
+      tile.style.color = '#333';
+      tile.style.cursor = 'grab';
+      tile.style.touchAction = 'none';
+
+      const onPointerDown = (e: PointerEvent): void => {
+        e.preventDefault();
+        tray.setDragging(index, true);
+      };
+      tile.addEventListener('pointerdown', onPointerDown);
+
+      // Reset dragging state on pointer up (in case drop landed elsewhere).
+      document.addEventListener('pointerup', function release() {
+        document.removeEventListener('pointerup', release);
+        tray.setDragging(index, false);
+      });
+
+      tray.element.appendChild(tile);
+    });
+  }
+
+  // Initial sync.
+  syncStepUI();
+
+  // Register this step's cleanup for lesson-wide cleanup.
+  wireCleanup(() => {
+    dragSession.destroy();
+    tray.destroy();
+    glider.destroy();
+  });
 }
 
 /**
- * Handle playing a phoneme clip.
+ * Wire idempotent cleanup: engine destroy, DOM component destroy, bridge destroy.
  */
-async function handlePlayClip(clipId: string): Promise<void> {
-  if (!audioEngine) return;
-  audioEngine.play(clipId);
+let pendingComponentCleanups: Array<() => void> = [];
+
+function wireCleanup(componentCleanup: () => void): void {
+  pendingComponentCleanups.push(componentCleanup);
+
+  if (cleanupWired) return;
+  cleanupWired = true;
+
+  window.addEventListener('pagehide', cleanupLesson);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+}
+
+function handleVisibilityChange(): void {
+  if (document.visibilityState === 'hidden') {
+    cleanupLesson();
+  }
 }
 
 /**
- * Navigate to previous word.
+ * Idempotent lesson cleanup. Safe to call multiple times.
  */
-function handlePrevious(): void {
-  if (currentWordIndex > 0) {
-    currentWordIndex--;
-    const app = document.getElementById('app');
-    if (app) {
-      app.innerHTML = '';
-      showLesson(app);
+export function cleanupLesson(): void {
+  if (lessonDestroyed) return;
+  lessonDestroyed = true;
+
+  for (const cleanup of pendingComponentCleanups) {
+    try {
+      cleanup();
+    } catch {
+      // Ignore individual component failures.
     }
   }
-}
+  pendingComponentCleanups = [];
 
-/**
- * Navigate to next word or advance pass.
- */
-function handleNext(): void {
-  if (currentPass === 1) {
-    // Advance to pass 2 for same word
-    currentPass = 2;
-  } else {
-    // Move to next word, reset to pass 1
-    currentPass = 1;
-    if (currentWordIndex < (manifest?.words.length ?? 0) - 1) {
-      currentWordIndex++;
-    }
-  }
-  const app = document.getElementById('app');
-  if (app) {
-    app.innerHTML = '';
-    showLesson(app);
-  }
+  audioEngine?.destroy();
+  audioEngine = null;
+  machine = null;
+  lessonRoot = null;
+
+  window.removeEventListener('pagehide', cleanupLesson);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+  destroyLessonBridge();
 }

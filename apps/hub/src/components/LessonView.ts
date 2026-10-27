@@ -2,6 +2,8 @@ import type { LessonConfig, ProgressState } from '../types';
 import type { LessonProgressPayload, LessonCompletePayload } from '@lillskolan/lesson-sdk';
 import { createHubBridge } from '../bridge';
 import { normalizeAccuracy } from '../storage';
+import { LESSON_ORIGIN } from '../config';
+import { createReturnHandler } from '../return-protocol';
 import { renderProgressBar, updateProgressBar } from './ProgressBar';
 import { renderStarsDisplay, updateStarsDisplay } from './StarsDisplay';
 import { renderReturnButton, updateReturnButton } from './ReturnButton';
@@ -117,10 +119,17 @@ export function renderLessonView(props: LessonViewProps): HTMLElement {
     starsDisplay.classList.add('lesson-view__stars--celebrate');
   });
 
+  // Return handler: fires when the lesson iframe sends LESSON_RETURN.
+  const returnHandler = createReturnHandler(LESSON_ORIGIN, handleReturn);
+  returnHandler.attach();
+
   // Cleanup function
   function cleanup() {
     // Clean unmount: blank the iframe to release WebAudio
     iframe.src = 'about:blank';
+
+    // Detach return handler
+    returnHandler.detach();
 
     // Remove bridge listeners
     unsubscribeProgress();

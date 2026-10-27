@@ -14,7 +14,7 @@ export const lessons: LessonConfig[] = [
     entry: '/',
     accentColor: '#4A90D9',
     icon: '📖',
-    estimatedSteps: 10,
+    estimatedSteps: 8,
   },
 ];
 
