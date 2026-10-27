@@ -138,7 +138,7 @@ describe('createDragSession', () => {
 
     expect(() => {
       tile.dispatchEvent(makePointerEvent('pointerdown', { pointerId: 1, target: tile }));
-      document.dispatchEvent(makePointerEvent('pointermove', { clientX: 5, clientY: 5, pointerId: 1 }));
+      document.dispatchEvent(makePointerEvent('pointermove', { clientX: 15, clientY: 15, pointerId: 1 }));
       document.dispatchEvent(makePointerEvent('pointerup', { pointerId: 1 }));
     }).not.toThrow();
 
@@ -159,4 +159,23 @@ describe('createDragSession', () => {
     expect(document.querySelector('.drag-ghost')).toBeNull();
     expect(onDrop).not.toHaveBeenCalled();
   });
+
+  it('does not start drag when pointermove is within threshold', () => {
+    const session = createDragSession({ root, getDraggable, onDrop });
+    const tile = makeTileEl(0);
+    root.appendChild(tile);
+
+    tile.dispatchEvent(makePointerEvent('pointerdown', { pointerId: 1, target: tile }));
+    // Small move within 8px threshold
+    document.dispatchEvent(makePointerEvent('pointermove', { clientX: 5, clientY: 5, pointerId: 1 }));
+    expect(document.querySelector('.drag-ghost')).toBeNull();
+    expect(onDrop).not.toHaveBeenCalled();
+
+    // pointerup should not trigger onDrop
+    document.dispatchEvent(makePointerEvent('pointerup', { clientX: 5, clientY: 5, pointerId: 1 }));
+    expect(onDrop).not.toHaveBeenCalled();
+
+    session.destroy();
+  });
+
 });
