@@ -18,6 +18,7 @@ import { createTapToStartGate } from './components/TapToStartGate';
 import { createSoundGlider } from './components/SoundGlider';
 import { createChunkTray } from './components/ChunkTray';
 import { createCompletionScreen } from './components/CompletionScreen';
+import { createCelebration } from './components/Celebration';
 import { createDragSession } from './drag/DragSession';
 import { WebAudioPhonemeEngine } from './audio/PhonemeEngine';
 import { playBlended } from './audio/BlendPlayer';
@@ -172,6 +173,10 @@ function showLesson(container: HTMLElement): void {
   advanceButton.style.marginTop = '0.5rem';
   container.appendChild(advanceButton);
 
+  // Celebration — decorative confetti burst on step completion.
+  const celebration = createCelebration();
+  container.appendChild(celebration.element);
+
   // Drag session — hit-tests the glider on drop.
   const dragSession = createDragSession({
     root: container,
@@ -266,6 +271,9 @@ function showLesson(container: HTMLElement): void {
     statusLine.textContent = '';
     advanceButton.disabled = false;
 
+    // Celebrate after the feedback flash (status line cleared, button enabled).
+    celebration.trigger();
+
     getLessonBridge().sendProgress({
       stepIndex: completedCount,
       totalSteps: machine.getTotalSteps(),
@@ -338,6 +346,7 @@ function showLesson(container: HTMLElement): void {
     dragSession.destroy();
     tray.destroy();
     glider.destroy();
+    celebration.destroy();
   });
 }
 
