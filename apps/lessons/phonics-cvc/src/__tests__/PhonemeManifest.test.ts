@@ -47,10 +47,10 @@ describe('phoneme-manifest', () => {
     }
   });
 
-  it('has 22 unique clips in manifest.clips', () => {
-    expect(manifest.clips).toHaveLength(22);
+  it('has 25 unique clips in manifest.clips (22 base + 3 onset variants)', () => {
+    expect(manifest.clips).toHaveLength(25);
     const unique = new Set(manifest.clips);
-    expect(unique.size).toBe(22);
+    expect(unique.size).toBe(25);
   });
 
   it('all clips referenced by words exist in manifest.clips', () => {
