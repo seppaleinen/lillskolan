@@ -13,12 +13,20 @@ if (typeof (globalThis as { PointerEvent?: unknown }).PointerEvent === 'undefine
   globalThis.PointerEvent = PointerEventPolyfill as unknown as typeof PointerEvent;
 }
 
-import { createChunkTray } from '../components/ChunkTray';
+import { createChunkTray, type TileOption } from '../components/ChunkTray';
 import type { PhonemeChunk } from '../types/phoneme-manifest';
 
 const chunks: PhonemeChunk[] = [
   { text: 'b', clip: 'b' },
   { text: 'il', clip: 'il' },
+];
+
+// TileOption[] with distractors (correct + distractor mix)
+const tileOptionsWithDistractors: TileOption[] = [
+  { chunk: { text: 'b', clip: 'b' }, isDistractor: false },
+  { chunk: { text: 't', clip: 't' }, isDistractor: true },
+  { chunk: { text: 'il', clip: 'il' }, isDistractor: false },
+  { chunk: { text: 's', clip: 's' }, isDistractor: true },
 ];
 
 describe('createChunkTray', () => {

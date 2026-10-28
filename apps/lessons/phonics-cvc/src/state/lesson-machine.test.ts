@@ -59,13 +59,13 @@ describe('createLessonMachine', () => {
   it('dropTile accepts correct tile in order', () => {
     const m = createLessonMachine(manifest);
     const r0 = m.dropTile(0);
-    expect(r0).toEqual({ ok: true });
+    expect(r0).toEqual({ ok: true, slot: 0 });
     expect(m.getCurrentStep().filled[0].chunk).not.toBeNull();
     expect(m.getCurrentStep().filled[0].correct).toBe(true);
     expect(m.getStepAccuracy()).toBe(1);
 
     const r1 = m.dropTile(1);
-    expect(r1).toEqual({ ok: true });
+    expect(r1).toEqual({ ok: true, slot: 1 });
     expect(m.isStepComplete()).toBe(true);
     expect(m.getStepAccuracy()).toBe(1);
   });
@@ -169,5 +169,126 @@ describe('createLessonMachine', () => {
 
     expect(m.getAverageAccuracy()).toBeCloseTo((2 / 3 + 1) / 2, 5);
     expect(m.getStars()).toBe(2);
+  });
+});
+
+describe('distractors + tileOptions (issue #16)', () => {
+  const distractorManifest: PhonemeManifest = {
+    version: '1.0.0',
+    words: [
+      {
+        id: 'bil',
+        letters: ['b', 'i', 'l'],
+        passes: [
+          {
+            chunks: [{ text: 'b', clip: 'b' }, { text: 'il', clip: 'il' }],
+            distractors: [{ text: 't', clip: 't' }, { text: 's', clip: 's' }],
+          },
+          { chunks: [{ text: 'b', clip: 'b' }, { text: 'i', clip: 'i' }, { text: 'l', clip: 'l' }] },
+        ],
+      },
+    ],
+    clips: ['b', 'i', 'l', 'il', 't', 's'],
+  };
+
+  it('tileOptions includes correct chunks marked non-distractor', () => {
+    const m = createLessonMachine(distractorManifest);
+    const opts = m.getCurrentStep().tileOptions;
+    const correct = opts.filter((o) => !o.isDistractor);
+    // Set comparison — shuffle may reorder correct chunks too.
+    expect(correct.map((o) => o.chunk.text).sort()).toEqual(['b', 'il']);
+  });
+
+  it('tileOptions includes distractors marked as distractor', () => {
+    const m = createLessonMachine(distractorManifest);
+    const opts = m.getCurrentStep().tileOptions;
+    const distractors = opts.filter((o) => o.isDistractor);
+    expect(distractors.map((o) => o.chunk.text)).toEqual(['t', 's']);
+  });
+
+  it('tileOptions are shuffled deterministically by stepIndex', () => {
+    const a = createLessonMachine(distractorManifest);
+    const b = createLessonMachine(distractorManifest);
+    const orderA = a.getCurrentStep().tileOptions.map((o) => o.chunk.text);
+    const orderB = b.getCurrentStep().tileOptions.map((o) => o.chunk.text);
+    expect(orderA).toEqual(orderB); // same seed → same shuffle
+    expect(orderA).not.toEqual(['b', 'il', 't', 's']); // shuffle actually mixed them
+    expect(orderA.sort()).toEqual(['b', 'il', 's', 't']); // same set, any order
+  });
+
+  it('legacy manifest (no distractors) keeps original order, no shuffle', () => {
+    const m = createLessonMachine(manifest);
+    const opts = m.getCurrentStep().tileOptions;
+    expect(opts.map((o) => o.chunk.text)).toEqual(['b', 'il']);
+    expect(opts.every((o) => !o.isDistractor)).toBe(true);
+  });
+
+  it('distractor tile is always rejected even in an empty slot', () => {
+    const m = createLessonMachine(distractorManifest);
+    const opts = m.getCurrentStep().tileOptions;
+    const distractorIdx = opts.findIndex((o) => o.isDistractor);
+    expect(distractorIdx).toBeGreaterThanOrEqual(0);
+    const r = m.dropTile(distractorIdx);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.expected).toBe(0); // first empty slot
+      expect(r.got).toBe(distractorIdx);
+    }
+    expect(m.getCurrentStep().filled[0].chunk).toBeNull();
+    expect(m.getStepAccuracy()).toBe(0);
+  });
+
+  it('correct tile is accepted regardless of its tray position after shuffle', () => {
+    const m = createLessonMachine(distractorManifest);
+    const opts = m.getCurrentStep().tileOptions;
+    // Find the tray index of the chunk that belongs in slot 0 ("b").
+    const bIdx = opts.findIndex((o) => !o.isDistractor && o.chunk.text === 'b');
+    expect(bIdx).not.toBe(0); // shuffled away from position 0
+    const r = m.dropTile(bIdx);
+    expect(r).toEqual({ ok: true, slot: 0 });
+    expect(m.getCurrentStep().filled[0].correct).toBe(true);
+  });
+
+  it('dropTile returns the slot index that was filled on success', () => {
+    const m = createLessonMachine(distractorManifest);
+    const opts = m.getCurrentStep().tileOptions;
+    const bIdx = opts.findIndex((o) => !o.isDistractor && o.chunk.text === 'b');
+    m.dropTile(bIdx);
+    const ilIdx = opts.findIndex((o) => !o.isDistractor && o.chunk.text === 'il');
+    const r = m.dropTile(ilIdx);
+    expect(r).toEqual({ ok: true, slot: 1 });
+  });
+
+  it('caps total tile options at MAX_TILE_OPTIONS (6)', () => {
+    const big: PhonemeManifest = {
+      version: '1.0.0',
+      words: [
+        {
+          id: 'big',
+          letters: ['b', 'i', 'g'],
+          passes: [
+            {
+              chunks: [{ text: 'b', clip: 'b' }, { text: 'ig', clip: 'ig' }],
+              distractors: [
+                { text: 't', clip: 't' },
+                { text: 's', clip: 's' },
+                { text: 'd', clip: 'd' },
+                { text: 'p', clip: 'p' },
+                { text: 'm', clip: 'm' },
+                { text: 'k', clip: 'k' },
+                { text: 'n', clip: 'n' },
+              ],
+            },
+            { chunks: [{ text: 'b', clip: 'b' }, { text: 'i', clip: 'i' }, { text: 'g', clip: 'g' }] },
+          ],
+        },
+      ],
+      clips: ['b', 'i', 'g', 'ig', 't', 's', 'd', 'p', 'm', 'k', 'n'],
+    };
+    const m = createLessonMachine(big);
+    expect(m.getCurrentStep().tileOptions.length).toBeLessThanOrEqual(6);
+    // Correct chunks are never dropped by the cap.
+    const correct = m.getCurrentStep().tileOptions.filter((o) => !o.isDistractor);
+    expect(correct.map((o) => o.chunk.text).sort()).toEqual(['b', 'ig']);
   });
 });

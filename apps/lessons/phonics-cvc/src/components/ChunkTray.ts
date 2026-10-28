@@ -9,6 +9,18 @@
 import type { PhonemeChunk } from '../types/phoneme-manifest';
 import { toDisplayCase, type CaseMode } from '../utils/displayCase';
 
+// Legacy support for PhonemeChunk arrays (backward compatibility)
+type LegacyChunks = PhonemeChunk[];
+
+// TileOption with distractor flag (matches lesson-machine.ts)
+export interface TileOption {
+  chunk: PhonemeChunk;
+  isDistractor: boolean;
+}
+
+// Unified input type for backward compatibility
+type ChunkInput = TileOption[] | LegacyChunks;
+
 export interface ChunkTrayHandlers {
   onDragStart(tileIndex: number, pointerId: number): void;
   onDragEnd(): void;
@@ -19,12 +31,12 @@ export interface ChunkTray {
   element: HTMLElement;
   setAvailable(tileIndex: number, available: boolean): void;
   setDragging(tileIndex: number, dragging: boolean): void;
-  update(chunks: PhonemeChunk[]): void;
+  update(chunks: ChunkInput): void;
   destroy(): void;
 }
 
 export function createChunkTray(
-  chunks: PhonemeChunk[],
+  chunks: ChunkInput,
   handlers: ChunkTrayHandlers,
   caseMode?: CaseMode
 ): ChunkTray {
@@ -38,8 +50,11 @@ export function createChunkTray(
   container.style.display = 'flex';
   container.style.justifyContent = 'center';
   container.style.alignItems = 'center';
+  container.style.flexWrap = 'wrap'; // adapts to 4-6 tiles without squeezing below 88px
   container.style.gap = '1rem';
   container.style.padding = '1rem';
+  container.style.maxWidth = '100%';
+  container.style.overflowX = 'auto'; // narrow screens: scroll horizontally, never shrink tiles
   container.style.background = 'rgba(255, 255, 255, 0.95)';
   container.style.backdropFilter = 'blur(4px)';
   container.style.borderTop = '2px solid #e0e0e0';
@@ -48,7 +63,7 @@ export function createChunkTray(
   const tiles: HTMLElement[] = [];
   const listeners: Array<{ el: HTMLElement; type: string; fn: EventListener }> = [];
 
-  function renderTiles(chunksToRender: PhonemeChunk[]) {
+  function renderTiles(chunksToRender: ChunkInput) {
     // Clean previous
     for (const { el, type, fn } of listeners) {
       el.removeEventListener(type, fn);
@@ -57,7 +72,14 @@ export function createChunkTray(
     tiles.length = 0;
     container.innerHTML = '';
 
-    chunksToRender.forEach((chunk, index) => {
+    // Normalize input to TileOption[] for backward compatibility
+    const normalizedChunks: TileOption[] = Array.isArray(chunksToRender) && 
+      'chunk' in (chunksToRender[0] as TileOption)
+      ? (chunksToRender as TileOption[])
+      : (chunksToRender as LegacyChunks).map(chunk => ({ chunk, isDistractor: false }));
+
+    normalizedChunks.forEach((tileOption, index) => {
+      const chunk = tileOption.chunk;
       const tile = document.createElement('div');
       tile.className = 'chunk-tile';
       tile.setAttribute('data-tile-index', String(index));
@@ -124,7 +146,7 @@ export function createChunkTray(
     }
   }
 
-  function update(chunks: PhonemeChunk[]): void {
+  function update(chunks: ChunkInput): void {
     renderTiles(chunks);
   }
 

@@ -10,11 +10,15 @@ export interface PhonemeChunk {
   text: string;
   /** The clip identifier (filename without .wav) */
   clip: string;
+  /** Runtime metadata: true if this chunk is a distractor (not part of correct answer) */
+  isDistractor?: boolean;
 }
 
 export interface PhonemePass {
   /** Ordered chunks for this pass */
   chunks: PhonemeChunk[];
+  /** Optional distractor chunks for this pass */
+  distractors?: PhonemeChunk[];
 }
 
 export interface PhonemeWord {
