@@ -5,6 +5,7 @@
 ### Added
 - `LessonBridge` class in `packages/lesson-sdk` for typed postMessage communication
 - **Progressive distractor tiles** in phonics-cvc ChunkTray (issue #16) — Pass 1 steps show 2 phonetically plausible single-consonant distractors alongside correct chunks; Pass 2 steps remain without distractors (baseline)
+- **Manifest** — Added `onsetContext?: string` to `PhonemeChunk` (Issue #11)
 
 ### Changed
 - Added `LessonProgressPayload` and `LessonCompletePayload` types
