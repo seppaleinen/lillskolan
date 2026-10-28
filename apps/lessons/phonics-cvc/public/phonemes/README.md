@@ -60,6 +60,98 @@ The manifest is the single source of truth — the engine loads exactly the clip
 - Clip IDs use lowercase, no spaces
 - Swedish letters (å, ä, ö) are URL-safe in filenames
 
+## `onsetContext` Field (Ready but Unused)
+
+The `PhonemeChunk` interface in `src/types/phoneme-manifest.ts` includes an optional `onsetContext?: string` field. This field is **documentation only** — the engine never reads it. It exists to prepare for future context-dependent onset clips (e.g., `b_i.wav`) that change based on surrounding phonemes (coarticulation).
+
+- **What it is for:** Marking a chunk's clip as a context-specific onset variant. When `onsetContext` is set to a vowel letter (e.g., `"i"`), it signals that the clip represents that onset pronounced in the context of that vowel.
+- **When it will be used:** Once context-dependent onset WAVs are generated and added to the manifest. Until then, no clips carry this field and it has no effect on runtime behavior.
+- **Backward compatibility:** The field is optional. Legacy manifests that omit it (like the current POC manifest) still type-check and run unchanged.
+
+Example chunk with `onsetContext`:
+
+```json
+{ "text": "b", "clip": "b_i", "onsetContext": "i" }
+```
+
+## Piper TTS Workflow (Context-Dependent Onsets)
+
+This section documents the pipeline for generating context-dependent onset clips using **Piper TTS** with the Swedish `sv_SE-alma-medium` voice (GPL-3.0, CC-BY 4.0).
+
+### Prerequisites
+
+```bash
+# Python 3.14+ (onnxruntime wheels required)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install piper-tts
+
+# Download Alma voice
+mkdir -p piper-voices
+cd piper-voices
+wget https://huggingface.co/yeagersthlm/piper-voice-sv-alma/resolve/main/sv_SE-alma-medium.onnx
+wget https://huggingface.co/yeagersthlm/piper-voice-sv-alma/resolve/main/sv_SE-alma-medium.onnx.json
+```
+
+### Generation
+
+```bash
+# From repo root
+node scripts/generate-onsets-piper.mjs
+```
+
+This generates 3 POC clips at `public/phonemes/`:
+| Clip | IPA | Context | Example Word |
+|------|-----|---------|--------------|
+| `b_i.wav` | `b iː` | bil | b_iː |
+| `b_a.wav` | `b ɑː` | bak | b_ɑː |
+| `h_u.wav` | `h ʉː` | hus | h_ʉː |
+
+The script:
+1. Synthesizes IPA phoneme sequences directly via `phonemes_to_ids()` + `phoneme_ids_to_audio()` (bypasses espeak)
+2. Outputs 22.05 kHz mono float32 WAV (Piper native sample rate)
+3. Uses `afconvert` to upsample to 44.1 kHz mono 16-bit PCM
+4. Validates non-silent output (peak > 1% FS)
+
+### Hand-Trim in Audacity (Required)
+
+Piper output includes the **full vowel** after the onset consonant. For onset clips, you must trim the trailing vowel to isolate the consonant burst + transition:
+
+1. Open `b_i.wav`, `b_a.wav`, `h_u.wav` in Audacity
+2. Zoom in — identify the consonant burst (noise/voice onset) + formant transition
+3. Select everything **after** the transition (the steady-state vowel)
+4. **Edit → Trim** (or `Cmd+T`) to remove the vowel tail
+5. Export as **WAV 44.1 kHz mono 16-bit PCM** (overwrite original)
+
+Target duration after trim: **~0.1–0.2s** (the burst + transition only).
+
+### IPA Reference for Swedish Onsets
+
+| Consonant | IPA | Example Vowel | IPA | Combined |
+|-----------|-----|---------------|-----|----------|
+| b | b | i | iː | b_iː |
+| b | b | a | ɑː | b_ɑː |
+| h | h | u | ʉː | h_ʉː |
+
+The generation script uses these IPA sequences:
+- `b_i`: `['b', 'ˈ', 'i', 'ː']` — stress + length markers
+- `b_a`: `['b', 'ˈ', 'ɑ', 'ː']` — open back unrounded vowel
+- `h_u`: `['h', 'ˈ', 'ʉ', 'ː']` — close central rounded vowel
+
+### Licensing
+
+- **Piper TTS**: MIT
+- **sv_SE-alma-medium**: GPL-3.0 (model) + CC-BY 4.0 (training data — Alma voice by Yeagersthlm)
+- Generated clips inherit **GPL-3.0 / CC-BY 4.0** — suitable for educational use with attribution
+
+### Adding More Onset Clips
+
+1. Add new entry to `clips` array in `scripts/generate-onsets-piper.mjs`
+2. Run the script
+3. Hand-trim in Audacity
+4. Add clip ID to `manifest.clips`
+5. Reference in word `passes[].chunks[].clip` with optional `onsetContext`
+
 ## Engine Behavior
 
 The `PhonemeEngine.load(manifest)` fetches `/phonemes/{clip}.wav` for each clip in `manifest.clips`, decodes to `AudioBuffer`, and caches. Playback uses `AudioBufferSourceNode` with optional `playbackRate`.

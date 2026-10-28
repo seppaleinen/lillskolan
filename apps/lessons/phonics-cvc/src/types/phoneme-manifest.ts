@@ -10,6 +10,11 @@ export interface PhonemeChunk {
   text: string;
   /** The clip identifier (filename without .wav) */
   clip: string;
+  /** Optional context-dependent onset marker (documentation only).
+   *  When present, e.g. "i", indicates the clip is a context-specific
+   *  onset variant such as b_i.wav. The engine does NOT use this field;
+   *  it is metadata for tooling, TTS generation, and future coarticulation. */
+  onsetContext?: string;
   /** Runtime metadata: true if this chunk is a distractor (not part of correct answer) */
   isDistractor?: boolean;
 }
