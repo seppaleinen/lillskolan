@@ -11,6 +11,15 @@
 import type { PhonemeChunk, PhonemeManifest } from '../types/phoneme-manifest';
 import { computeStars } from '../scoring';
 
+/** Maximum number of tile options shown (correct + distractors) */
+const MAX_TILE_OPTIONS = 6;
+
+/** Tile option with distractor flag */
+export interface TileOption {
+  chunk: PhonemeChunk;
+  isDistractor: boolean;
+}
+
 export interface StepState {
   stepIndex: number; // 0-based internal
   wordId: string;
@@ -21,9 +30,11 @@ export interface StepState {
   correctDrops: number;
   incorrectDrops: number;
   complete: boolean;
+  /** Shuffled mix of correct chunks and distractors for this step */
+  tileOptions: TileOption[];
 }
 
-export type DropResult = { ok: true } | { ok: false; expected: number; got: number };
+export type DropResult = { ok: true; slot: number } | { ok: false; expected: number; got: number };
 
 export interface LessonMachine {
   getCurrentStep(): StepState;
@@ -38,6 +49,33 @@ export interface LessonMachine {
   getStars(): number; // computeStars(getAverageAccuracy())
 }
 
+/**
+ * Linear Congruential Generator for deterministic pseudo-random numbers.
+ * seeded by wordIndex + passIndex for reproducibility.
+ */
+function lcg(seed: number): () => number {
+  let state = seed;
+  return () => {
+    // LCG parameters (same as glibc)
+    state = (state * 1103515245 + 12345) & 0x7fffffff;
+    return state / 0x7fffffff;
+  };
+}
+
+/**
+ * Fisher-Yates shuffle with deterministic LCG seeding.
+ * Returns a new shuffled array.
+ */
+function shuffleTiles<T>(items: T[], seed: number): T[] {
+  const rand = lcg(seed);
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 export function createLessonMachine(manifest: PhonemeManifest): LessonMachine {
   const totalSteps = manifest.words.length * 2; // 16
 
@@ -45,6 +83,41 @@ export function createLessonMachine(manifest: PhonemeManifest): LessonMachine {
     const word = manifest.words[stepIndex % manifest.words.length];
     const pass = Math.floor(stepIndex / manifest.words.length) + 1; // 1 or 2
     return word.passes[pass - 1].chunks;
+  }
+
+  /**
+   * Build tile options for a step: correct chunks + distractors, capped at MAX_TILE_OPTIONS.
+   * Shuffled deterministically by stepIndex only when distractors are present.
+   * Legacy manifests without distractors get tiles in original order (backward compatible).
+   */
+  function tileOptionsForStep(stepIndex: number): TileOption[] {
+    const word = manifest.words[stepIndex % manifest.words.length];
+    const pass = Math.floor(stepIndex / manifest.words.length) + 1; // 1 or 2
+    const passData = word.passes[pass - 1];
+
+    // Correct chunks (always included, marked as non-distractors)
+    const correctOptions: TileOption[] = passData.chunks.map((chunk) => ({
+      chunk,
+      isDistractor: false,
+    }));
+
+    // Distractors (if available)
+    const distractors = passData.distractors ?? [];
+    const distractorOptions: TileOption[] = distractors.map((chunk) => ({
+      chunk: { ...chunk, isDistractor: true },
+      isDistractor: true,
+    }));
+
+    // Combine: prioritize correct chunks, fill with distractors up to cap
+    const allOptions = [...correctOptions, ...distractorOptions];
+    const cappedOptions = allOptions.slice(0, MAX_TILE_OPTIONS);
+
+    // Only shuffle when there are distractors to mix in.
+    // Legacy manifests (no distractors) get tiles in original order.
+    if (distractorOptions.length > 0) {
+      return shuffleTiles(cappedOptions, stepIndex);
+    }
+    return cappedOptions;
   }
 
   function slotCountFor(stepIndex: number): number {
@@ -76,6 +149,7 @@ export function createLessonMachine(manifest: PhonemeManifest): LessonMachine {
       correctDrops,
       incorrectDrops,
       complete: filled.every((f) => f.chunk !== null),
+      tileOptions: tileOptionsForStep(stepIndex),
     };
   }
 
@@ -109,12 +183,34 @@ export function createLessonMachine(manifest: PhonemeManifest): LessonMachine {
         incorrectDrops++;
         return { ok: false, expected: emptyIdx, got: tileIndex };
       }
-      if (tileIndex === emptyIdx) {
-        const chunk = chunksForStep(stepIndex)[tileIndex];
-        filled[emptyIdx] = { chunk, correct: true };
-        correctDrops++;
-        return { ok: true };
+
+      const currentTileOptions = tileOptionsForStep(stepIndex);
+
+      // Out of bounds check
+      if (tileIndex < 0 || tileIndex >= currentTileOptions.length) {
+        incorrectDrops++;
+        return { ok: false, expected: emptyIdx, got: tileIndex };
       }
+
+      const droppedOption = currentTileOptions[tileIndex];
+
+      // Always reject distractor tiles
+      if (droppedOption.isDistractor) {
+        incorrectDrops++;
+        return { ok: false, expected: emptyIdx, got: tileIndex };
+      }
+
+      // Check if dropped chunk matches the expected chunk for the first empty slot
+      const expectedChunk = chunksForStep(stepIndex)[emptyIdx];
+      const droppedChunk = droppedOption.chunk;
+
+      // Compare by text and clip for safety
+      if (droppedChunk.text === expectedChunk.text && droppedChunk.clip === expectedChunk.clip) {
+        filled[emptyIdx] = { chunk: expectedChunk, correct: true };
+        correctDrops++;
+        return { ok: true, slot: emptyIdx };
+      }
+
       incorrectDrops++;
       return { ok: false, expected: emptyIdx, got: tileIndex };
     },

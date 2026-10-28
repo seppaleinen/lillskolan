@@ -22,7 +22,7 @@ import { createCelebration } from './components/Celebration';
 import { createDragSession } from './drag/DragSession';
 import { WebAudioPhonemeEngine } from './audio/PhonemeEngine';
 import { playBlended } from './audio/BlendPlayer';
-import { createLessonMachine, type LessonMachine } from './state/lesson-machine';
+import { createLessonMachine, type LessonMachine, type TileOption } from './state/lesson-machine';
 import { getLessonBridge, destroyLessonBridge } from './bridge';
 import { createReturnMessage } from './return-protocol';
 import { HUB_ORIGIN } from './config';
@@ -136,7 +136,7 @@ function showLesson(container: HTMLElement): void {
   container.appendChild(glider.element);
 
   // Tray
-  const tray = createChunkTray(step.chunks, {
+  const tray = createChunkTray(step.tileOptions, {
     onDragStart: (tileIndex) => {
       tray.setDragging(tileIndex, true);
       glider.setActiveSlot(firstEmptySlot());
@@ -146,11 +146,11 @@ function showLesson(container: HTMLElement): void {
     },
     onTileClick: (tileIndex) => {
       if (!audioEngine?.isReady() || !machine) return;
-      const chunk = machine.getCurrentStep().chunks[tileIndex];
-      if (!chunk) return;
+      const tileOption = machine.getCurrentStep().tileOptions[tileIndex];
+      if (!tileOption) return;
       try {
         audioEngine.stop();
-        audioEngine.play(chunk.clip);
+        audioEngine.play(tileOption.chunk.clip);
       } catch {
         // Ignore missing clip
       }
@@ -225,8 +225,12 @@ function showLesson(container: HTMLElement): void {
 
     const result = machine.dropTile(tileIndex);
     if (result.ok) {
-      const droppedChunk = machine.getCurrentStep().chunks[tileIndex];
-      glider.markSlotFilled(tileIndex, droppedChunk);
+      const droppedOption = machine.getCurrentStep().tileOptions[tileIndex];
+      const droppedChunk = droppedOption.chunk;
+      // `result.slot` is the glider slot index (fill order), NOT the tray index.
+      // With shuffled tiles these differ — marking by tray index would fill the
+      // wrong slot.
+      glider.markSlotFilled(result.slot, droppedChunk);
       tray.setAvailable(tileIndex, false);
       if (audioEngine?.isReady()) {
         try {
@@ -331,13 +335,13 @@ function showLesson(container: HTMLElement): void {
     stepCounter.textContent = `Steg ${newStep.stepIndex + 1} av ${machine.getTotalSteps()}`;
     statusLine.textContent = '';
     glider.renderStep(newStep.chunks);
-    rebuildTray(newStep.chunks);
+    rebuildTray(newStep.tileOptions);
     syncStepUI();
   });
 
-  function rebuildTray(chunks: PhonemeChunk[]): void {
+  function rebuildTray(tileOptions: TileOption[]): void {
     // Replace the tray in place using ChunkTray's update method
-    tray.update(chunks);
+    tray.update(tileOptions);
   }
 
   // Initial sync.
