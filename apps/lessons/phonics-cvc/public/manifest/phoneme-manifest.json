@@ -3,193 +3,452 @@
   "words": [
     {
       "id": "bil",
-      "letters": ["b", "i", "l"],
+      "letters": [
+        "b",
+        "i",
+        "l"
+      ],
       "passes": [
         {
           "chunks": [
-            { "text": "b", "clip": "b" },
-            { "text": "il", "clip": "il" }
+            {
+              "text": "b",
+              "clip": "b"
+            },
+            {
+              "text": "il",
+              "clip": "il"
+            }
           ],
           "distractors": [
-            { "text": "t", "clip": "t" },
-            { "text": "s", "clip": "s" }
+            {
+              "text": "t",
+              "clip": "t"
+            },
+            {
+              "text": "s",
+              "clip": "s"
+            }
           ]
         },
         {
           "chunks": [
-            { "text": "b", "clip": "b" },
-            { "text": "i", "clip": "i" },
-            { "text": "l", "clip": "l" }
+            {
+              "text": "b",
+              "clip": "b"
+            },
+            {
+              "text": "i",
+              "clip": "i"
+            },
+            {
+              "text": "l",
+              "clip": "l"
+            }
           ]
         }
       ]
     },
     {
       "id": "hus",
-      "letters": ["h", "u", "s"],
+      "letters": [
+        "h",
+        "u",
+        "s"
+      ],
       "passes": [
         {
           "chunks": [
-            { "text": "h", "clip": "h" },
-            { "text": "us", "clip": "us" }
+            {
+              "text": "h",
+              "clip": "h"
+            },
+            {
+              "text": "us",
+              "clip": "us"
+            }
           ],
           "distractors": [
-            { "text": "o", "clip": "o" },
-            { "text": "a", "clip": "a" }
+            {
+              "text": "o",
+              "clip": "o"
+            },
+            {
+              "text": "a",
+              "clip": "a"
+            }
           ]
         },
         {
           "chunks": [
-            { "text": "h", "clip": "h" },
-            { "text": "u", "clip": "u" },
-            { "text": "s", "clip": "s" }
+            {
+              "text": "h",
+              "clip": "h"
+            },
+            {
+              "text": "u",
+              "clip": "u"
+            },
+            {
+              "text": "s",
+              "clip": "s"
+            }
           ]
         }
       ]
     },
     {
       "id": "sak",
-      "letters": ["s", "a", "k"],
+      "letters": [
+        "s",
+        "a",
+        "k"
+      ],
       "passes": [
         {
           "chunks": [
-            { "text": "s", "clip": "s" },
-            { "text": "ak", "clip": "ak" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "ak",
+              "clip": "ak"
+            }
           ],
           "distractors": [
-            { "text": "t", "clip": "t" },
-            { "text": "m", "clip": "m" }
+            {
+              "text": "t",
+              "clip": "t"
+            },
+            {
+              "text": "m",
+              "clip": "m"
+            }
           ]
         },
         {
           "chunks": [
-            { "text": "s", "clip": "s" },
-            { "text": "a", "clip": "a" },
-            { "text": "k", "clip": "k" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "a",
+              "clip": "a"
+            },
+            {
+              "text": "k",
+              "clip": "k"
+            }
           ]
         }
       ]
     },
     {
       "id": "man",
-      "letters": ["m", "a", "n"],
+      "letters": [
+        "m",
+        "a",
+        "n"
+      ],
       "passes": [
         {
           "chunks": [
-            { "text": "m", "clip": "m" },
-            { "text": "an", "clip": "an" }
+            {
+              "text": "m",
+              "clip": "m"
+            },
+            {
+              "text": "an",
+              "clip": "an"
+            }
           ],
           "distractors": [
-            { "text": "s", "clip": "s" },
-            { "text": "t", "clip": "t" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "t",
+              "clip": "t"
+            }
           ]
         },
         {
           "chunks": [
-            { "text": "m", "clip": "m" },
-            { "text": "a", "clip": "a" },
-            { "text": "n", "clip": "n" }
+            {
+              "text": "m",
+              "clip": "m"
+            },
+            {
+              "text": "a",
+              "clip": "a"
+            },
+            {
+              "text": "n",
+              "clip": "n"
+            }
           ]
         }
       ]
     },
     {
       "id": "tid",
-      "letters": ["t", "i", "d"],
+      "letters": [
+        "t",
+        "i",
+        "d"
+      ],
       "passes": [
         {
           "chunks": [
-            { "text": "t", "clip": "t" },
-            { "text": "id", "clip": "id" }
+            {
+              "text": "t",
+              "clip": "t"
+            },
+            {
+              "text": "id",
+              "clip": "id"
+            }
           ],
           "distractors": [
-            { "text": "s", "clip": "s" },
-            { "text": "n", "clip": "n" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "n",
+              "clip": "n"
+            }
           ]
         },
         {
           "chunks": [
-            { "text": "t", "clip": "t" },
-            { "text": "i", "clip": "i" },
-            { "text": "d", "clip": "d" }
+            {
+              "text": "t",
+              "clip": "t"
+            },
+            {
+              "text": "i",
+              "clip": "i"
+            },
+            {
+              "text": "d",
+              "clip": "d"
+            }
           ]
         }
       ]
     },
     {
       "id": "nät",
-      "letters": ["n", "ä", "t"],
+      "letters": [
+        "n",
+        "ä",
+        "t"
+      ],
       "passes": [
         {
           "chunks": [
-            { "text": "n", "clip": "n" },
-            { "text": "ät", "clip": "ät" }
+            {
+              "text": "n",
+              "clip": "n"
+            },
+            {
+              "text": "ät",
+              "clip": "ät"
+            }
           ],
           "distractors": [
-            { "text": "s", "clip": "s" },
-            { "text": "t", "clip": "t" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "t",
+              "clip": "t"
+            }
           ]
         },
         {
           "chunks": [
-            { "text": "n", "clip": "n" },
-            { "text": "ä", "clip": "ä" },
-            { "text": "t", "clip": "t" }
+            {
+              "text": "n",
+              "clip": "n"
+            },
+            {
+              "text": "ä",
+              "clip": "ä"
+            },
+            {
+              "text": "t",
+              "clip": "t"
+            }
           ]
         }
       ]
     },
     {
       "id": "säl",
-      "letters": ["s", "ä", "l"],
+      "letters": [
+        "s",
+        "ä",
+        "l"
+      ],
       "passes": [
         {
           "chunks": [
-            { "text": "s", "clip": "s" },
-            { "text": "äl", "clip": "äl" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "äl",
+              "clip": "äl"
+            }
           ],
           "distractors": [
-            { "text": "t", "clip": "t" },
-            { "text": "n", "clip": "n" }
+            {
+              "text": "t",
+              "clip": "t"
+            },
+            {
+              "text": "n",
+              "clip": "n"
+            }
           ]
         },
         {
           "chunks": [
-            { "text": "s", "clip": "s" },
-            { "text": "ä", "clip": "ä" },
-            { "text": "l", "clip": "l" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "ä",
+              "clip": "ä"
+            },
+            {
+              "text": "l",
+              "clip": "l"
+            }
           ]
         }
       ]
     },
     {
       "id": "sol",
-      "letters": ["s", "o", "l"],
+      "letters": [
+        "s",
+        "o",
+        "l"
+      ],
       "passes": [
         {
           "chunks": [
-            { "text": "s", "clip": "s" },
-            { "text": "ol", "clip": "ol" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "ol",
+              "clip": "ol"
+            }
           ],
           "distractors": [
-            { "text": "t", "clip": "t" },
-            { "text": "n", "clip": "n" }
+            {
+              "text": "t",
+              "clip": "t"
+            },
+            {
+              "text": "n",
+              "clip": "n"
+            }
           ]
         },
         {
           "chunks": [
-            { "text": "s", "clip": "s" },
-            { "text": "o", "clip": "o" },
-            { "text": "l", "clip": "l" }
+            {
+              "text": "s",
+              "clip": "s"
+            },
+            {
+              "text": "o",
+              "clip": "o"
+            },
+            {
+              "text": "l",
+              "clip": "l"
+            }
           ]
         }
       ]
     }
   ],
   "clips": [
-    "b","h","s","m","t","n","d","i","u","a","ä","o","l","k",
-    "il","us","ak","an","id","ät","äl","ol",
-    "b_i","b_a","h_u"
+    "a",
+    "ak",
+    "an",
+    "b",
+    "b_a",
+    "b_i",
+    "b_o",
+    "b_u",
+    "b_ä",
+    "d",
+    "d_a",
+    "d_i",
+    "d_o",
+    "d_u",
+    "d_ä",
+    "h",
+    "h_a",
+    "h_i",
+    "h_o",
+    "h_u",
+    "h_ä",
+    "i",
+    "id",
+    "il",
+    "k",
+    "k_a",
+    "k_i",
+    "k_o",
+    "k_u",
+    "k_ä",
+    "l",
+    "m",
+    "m_a",
+    "m_i",
+    "m_o",
+    "m_u",
+    "m_ä",
+    "n",
+    "n_a",
+    "n_i",
+    "n_o",
+    "n_u",
+    "n_ä",
+    "o",
+    "ol",
+    "s",
+    "s_a",
+    "s_i",
+    "s_o",
+    "s_u",
+    "s_ä",
+    "t",
+    "t_a",
+    "t_i",
+    "t_o",
+    "t_u",
+    "t_ä",
+    "u",
+    "us",
+    "ä",
+    "äl",
+    "ät"
   ],
   "caseMode": "upper"
 }
