@@ -7,3 +7,4 @@ coverage
 *.tsbuildinfo
 dev.pid
 apps/**/.env
+piper-voices/

@@ -74,6 +74,12 @@ Example chunk with `onsetContext`:
 { "text": "b", "clip": "b_i", "onsetContext": "i" }
 ```
 
+## Why Piper TTS? (Decision Rationale)
+
+Piper TTS was chosen for context-dependent onset generation over cloud TTS alternatives (Coqui, ElevenLabs, Azure) because it is **local, open-source, and CPU-only** — no API keys, no network dependency, and no per-request latency. The Swedish `sv_SE-alma-medium` voice (GPL-3.0 / CC-BY 4.0) runs on Apple Silicon via onnxruntime and models coarticulation naturally: the same consonant sounds different before `/i/` than before `/a/`, which is exactly what the phonics lesson needs. Generated clips inherit the Alma voice license and are suitable for educational use with attribution.
+
+The manifest-side decision (the optional `onsetContext?: string` field on `PhonemeChunk`) is documented in [ADR 0008](../../../docs/adr/0008-manifest-onset-context.md). This section covers the TTS engine choice and the generation workflow.
+
 ## Piper TTS Workflow (Context-Dependent Onsets)
 
 This section documents the pipeline for generating context-dependent onset clips using **Piper TTS** with the Swedish `sv_SE-alma-medium` voice (GPL-3.0, CC-BY 4.0).
