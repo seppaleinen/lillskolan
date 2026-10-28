@@ -180,7 +180,7 @@ describe('main.ts', () => {
     expect(app.classList.contains('lesson-container')).toBe(true);
     expect(app.querySelector('.sound-glider')).not.toBeNull();
     expect(app.querySelector('.chunk-tray')).not.toBeNull();
-    expect(app.querySelector('.word-display')?.textContent).toBe('bil');
+    expect(app.querySelector('.word-display')?.textContent).toBe('BIL');
     expect(app.querySelector('.pass-indicator')?.textContent).toContain('Omgång 1 av 2');
     expect(app.querySelector('.step-counter')?.textContent).toContain('Steg 1 av 16');
     expect(app.querySelector('.btn-step')?.textContent).toContain('Nästa ord');

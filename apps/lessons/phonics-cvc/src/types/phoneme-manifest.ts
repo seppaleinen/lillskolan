@@ -3,6 +3,8 @@
  * Loaded from public/manifest/phoneme-manifest.json
  */
 
+import type { CaseMode } from '../utils/displayCase';
+
 export interface PhonemeChunk {
   /** The phoneme text (e.g., "b", "il") */
   text: string;
@@ -31,4 +33,6 @@ export interface PhonemeManifest {
   words: PhonemeWord[];
   /** All unique clip IDs referenced by words */
   clips: string[];
+  /** Case mode for progressive introduction: upper → lower → mixed */
+  caseMode?: CaseMode;
 }

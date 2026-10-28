@@ -41,5 +41,6 @@
   "clips": [
     "b","h","s","m","t","n","d","i","u","a","ä","o","l","k",
     "il","us","ak","an","id","ät","äl","ol"
-  ]
+  ],
+  "caseMode": "upper"
 }

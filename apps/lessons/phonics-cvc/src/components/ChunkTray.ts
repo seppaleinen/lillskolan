@@ -7,6 +7,7 @@
  */
 
 import type { PhonemeChunk } from '../types/phoneme-manifest';
+import { toDisplayCase, type CaseMode } from '../utils/displayCase';
 
 export interface ChunkTrayHandlers {
   onDragStart(tileIndex: number, pointerId: number): void;
@@ -24,7 +25,8 @@ export interface ChunkTray {
 
 export function createChunkTray(
   chunks: PhonemeChunk[],
-  handlers: ChunkTrayHandlers
+  handlers: ChunkTrayHandlers,
+  caseMode?: CaseMode
 ): ChunkTray {
   const container = document.createElement('div');
   container.className = 'chunk-tray';
@@ -59,7 +61,7 @@ export function createChunkTray(
       const tile = document.createElement('div');
       tile.className = 'chunk-tile';
       tile.setAttribute('data-tile-index', String(index));
-      tile.textContent = chunk.text;
+      tile.textContent = toDisplayCase(chunk.text, caseMode);
       tile.style.minWidth = '88px';
       tile.style.minHeight = '88px';
       tile.style.display = 'flex';
