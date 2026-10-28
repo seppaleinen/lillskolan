@@ -9,6 +9,7 @@
  */
 
 import type { PhonemeChunk } from '../types/phoneme-manifest';
+import { toDisplayCase, type CaseMode } from '../utils/displayCase';
 
 export interface SoundGliderHandlers {
   onDrop(tileIndex: number, slotIndex: number): void;
@@ -25,7 +26,8 @@ export interface SoundGlider {
 
 export function createSoundGlider(
   chunks: PhonemeChunk[],
-  _handlers: SoundGliderHandlers
+  _handlers: SoundGliderHandlers,
+  caseMode?: CaseMode
 ): SoundGlider {
   const container = document.createElement('div');
   container.className = 'sound-glider';
@@ -72,7 +74,7 @@ export function createSoundGlider(
     slot.style.borderStyle = 'solid';
     slot.style.background = '#4a90d9';
     slot.style.color = '#fff';
-    slot.textContent = chunk.text;
+    slot.textContent = toDisplayCase(chunk.text, caseMode);
   }
 
   function setActiveSlot(slotIndex: number | null): void {

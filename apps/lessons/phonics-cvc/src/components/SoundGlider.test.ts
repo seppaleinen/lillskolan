@@ -58,7 +58,7 @@ describe('createSoundGlider', () => {
 
     glider.markSlotFilled(0, pass1[0]);
     expect(slot.classList.contains('filled')).toBe(true);
-    expect(slot.textContent).toBe('b');
+    expect(slot.textContent).toBe('B');
     expect(slot.style.borderStyle).toBe('solid');
     // jsdom normalizes #4a90d9 to rgb(74, 144, 217) in style.background
     expect(slot.style.background).toBe('rgb(74, 144, 217)');
@@ -100,5 +100,50 @@ describe('createSoundGlider', () => {
     const glider = createSoundGlider(pass1, handlers);
     glider.destroy();
     expect(glider.element.querySelectorAll('[data-slot-index]').length).toBe(0);
+  });
+
+  describe('caseMode', () => {
+    it('defaults to upper when caseMode is undefined', () => {
+      const handlers = { onDrop: () => {} };
+      const glider = createSoundGlider(pass1, handlers);
+      glider.markSlotFilled(0, pass1[0]);
+      const slot = glider.element.querySelector<HTMLElement>('[data-slot-index="0"]')!;
+      expect(slot.textContent).toBe('B');
+    });
+
+    it('uppercases chunk text when caseMode is "upper"', () => {
+      const handlers = { onDrop: () => {} };
+      const glider = createSoundGlider(pass1, handlers, 'upper');
+      glider.markSlotFilled(0, pass1[0]);
+      const slot = glider.element.querySelector<HTMLElement>('[data-slot-index="0"]')!;
+      expect(slot.textContent).toBe('B');
+    });
+
+    it('lowercases chunk text when caseMode is "lower"', () => {
+      const handlers = { onDrop: () => {} };
+      const glider = createSoundGlider(pass1, handlers, 'lower');
+      glider.markSlotFilled(0, pass1[0]);
+      const slot = glider.element.querySelector<HTMLElement>('[data-slot-index="0"]')!;
+      expect(slot.textContent).toBe('b');
+    });
+
+    it('capitalizes first letter, lowercases rest when caseMode is "mixed"', () => {
+      const handlers = { onDrop: () => {} };
+      const glider = createSoundGlider(pass1, handlers, 'mixed');
+      glider.markSlotFilled(1, pass1[1]);
+      const slot = glider.element.querySelector<HTMLElement>('[data-slot-index="1"]')!;
+      expect(slot.textContent).toBe('Il');
+    });
+
+    it('handles special characters like ä in mixed mode', () => {
+      const mixedChunks: PhonemeChunk[] = [
+        { text: 'nät', clip: 'ät' },
+      ];
+      const handlers = { onDrop: () => {} };
+      const glider = createSoundGlider(mixedChunks, handlers, 'mixed');
+      glider.markSlotFilled(0, mixedChunks[0]);
+      const slot = glider.element.querySelector<HTMLElement>('[data-slot-index="0"]')!;
+      expect(slot.textContent).toBe('Nät');
+    });
   });
 });

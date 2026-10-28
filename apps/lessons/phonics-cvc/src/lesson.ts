@@ -26,6 +26,7 @@ import { createLessonMachine, type LessonMachine } from './state/lesson-machine'
 import { getLessonBridge, destroyLessonBridge } from './bridge';
 import { createReturnMessage } from './return-protocol';
 import { HUB_ORIGIN } from './config';
+import { toDisplayCase, type CaseMode } from './utils/displayCase';
 import type { PhonemeManifest, PhonemeChunk } from './types/phoneme-manifest';
 
 let audioEngine: WebAudioPhonemeEngine | null = null;
@@ -83,6 +84,7 @@ function showLesson(container: HTMLElement): void {
   if (!manifest || !audioEngine) return;
 
   machine = createLessonMachine(manifest);
+  const caseMode: CaseMode = manifest.caseMode ?? 'upper';
 
   container.innerHTML = '';
   container.className = 'lesson-container';
@@ -130,7 +132,7 @@ function showLesson(container: HTMLElement): void {
 
   // Glider
   const step = machine.getCurrentStep();
-  const glider = createSoundGlider(step.chunks, { onDrop: () => {} });
+  const glider = createSoundGlider(step.chunks, { onDrop: () => {} }, caseMode);
   container.appendChild(glider.element);
 
   // Tray
@@ -153,7 +155,7 @@ function showLesson(container: HTMLElement): void {
         // Ignore missing clip
       }
     },
-  });
+  }, caseMode);
   container.appendChild(tray.element);
 
   // Advance button
@@ -208,7 +210,7 @@ function showLesson(container: HTMLElement): void {
     const stepState = machine.getCurrentStep();
     const isFinalStep = machine.getStepIndex() === machine.getTotalSteps() - 1;
 
-    wordDisplay.textContent = stepState.wordId;
+    wordDisplay.textContent = toDisplayCase(stepState.wordId, caseMode);
     passIndicator.textContent = `Omgång ${stepState.pass} av 2`;
     stepCounter.textContent = `Steg ${stepState.stepIndex + 1} av ${machine.getTotalSteps()}`;
     advanceButton.textContent = isFinalStep ? 'Avsluta →' : 'Nästa ord →';
@@ -324,7 +326,7 @@ function showLesson(container: HTMLElement): void {
       return;
     }
     const newStep = machine.getCurrentStep();
-    wordDisplay.textContent = newStep.wordId;
+    wordDisplay.textContent = toDisplayCase(newStep.wordId, caseMode);
     passIndicator.textContent = `Omgång ${newStep.pass} av 2`;
     stepCounter.textContent = `Steg ${newStep.stepIndex + 1} av ${machine.getTotalSteps()}`;
     statusLine.textContent = '';

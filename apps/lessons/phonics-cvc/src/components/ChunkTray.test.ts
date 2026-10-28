@@ -27,8 +27,8 @@ describe('createChunkTray', () => {
     const tray = createChunkTray(chunks, handlers);
     const tiles = tray.element.querySelectorAll('[data-tile-index]');
     expect(tiles).toHaveLength(2);
-    expect(tiles[0].textContent).toBe('b');
-    expect(tiles[1].textContent).toBe('il');
+    expect(tiles[0].textContent).toBe('B');
+    expect(tiles[1].textContent).toBe('IL');
   });
 
   it('has Swedish aria-label on container', () => {
@@ -91,5 +91,49 @@ describe('createChunkTray', () => {
     // After destroy, pointerdown should not fire onDragStart.
     tile.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     expect(handlers.onDragStart).not.toHaveBeenCalled();
+  });
+
+  describe('caseMode', () => {
+    it('defaults to upper when caseMode is undefined', () => {
+      const handlers = { onDragStart: () => {}, onDragEnd: () => {} };
+      const tray = createChunkTray(chunks, handlers);
+      const tiles = tray.element.querySelectorAll('[data-tile-index]');
+      expect(tiles[0].textContent).toBe('B');
+      expect(tiles[1].textContent).toBe('IL');
+    });
+
+    it('uppercases all chunk text when caseMode is "upper"', () => {
+      const handlers = { onDragStart: () => {}, onDragEnd: () => {} };
+      const tray = createChunkTray(chunks, handlers, 'upper');
+      const tiles = tray.element.querySelectorAll('[data-tile-index]');
+      expect(tiles[0].textContent).toBe('B');
+      expect(tiles[1].textContent).toBe('IL');
+    });
+
+    it('lowercases all chunk text when caseMode is "lower"', () => {
+      const handlers = { onDragStart: () => {}, onDragEnd: () => {} };
+      const tray = createChunkTray(chunks, handlers, 'lower');
+      const tiles = tray.element.querySelectorAll('[data-tile-index]');
+      expect(tiles[0].textContent).toBe('b');
+      expect(tiles[1].textContent).toBe('il');
+    });
+
+    it('capitalizes first letter, lowercases rest when caseMode is "mixed"', () => {
+      const handlers = { onDragStart: () => {}, onDragEnd: () => {} };
+      const tray = createChunkTray(chunks, handlers, 'mixed');
+      const tiles = tray.element.querySelectorAll('[data-tile-index]');
+      expect(tiles[0].textContent).toBe('B');
+      expect(tiles[1].textContent).toBe('Il');
+    });
+
+    it('handles special characters like ä in mixed mode', () => {
+      const mixedChunks: PhonemeChunk[] = [
+        { text: 'nät', clip: 'ät' },
+      ];
+      const handlers = { onDragStart: () => {}, onDragEnd: () => {} };
+      const tray = createChunkTray(mixedChunks, handlers, 'mixed');
+      const tile = tray.element.querySelector<HTMLElement>('[data-tile-index="0"]')!;
+      expect(tile.textContent).toBe('Nät');
+    });
   });
 });
