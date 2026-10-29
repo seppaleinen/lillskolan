@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Get changed packages from staged files
+CHANGED=$(git diff --cached --name-only | grep -E '^(apps/|packages/)' | cut -d'/' -f1,2 | sort -u)
+
+if [ -n "$CHANGED" ]; then
+  echo "Running typecheck + tests on changed packages..."
+  for PKG in $CHANGED; do
+    echo "  → $PKG"
+    pnpm --filter "$PKG" typecheck && pnpm --filter "$PKG" test || exit 1
+  done
+  echo "✅ Pre-commit checks passed"
+else
+  echo "No package changes detected, skipping pre-commit checks"
+fi
