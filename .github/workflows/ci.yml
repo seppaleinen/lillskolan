@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -17,3 +19,28 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r build
       - run: pnpm -r test
+      - name: Binary asset audit
+        run: |
+          # Fail if any tracked file >10 MB is not LFS-managed.
+          # See docs/adr/0009-binary-asset-policy.md
+          set -e
+          LIMIT=10485760
+          BAD=""
+          while IFS= read -r -d '' f; do
+            sz=$(stat -c%s "$f")
+            if [ "$sz" -gt "$LIMIT" ]; then
+              if ! git check-attr -a "$f" | grep -q "filter: lfs"; then
+                BAD="$BAD $f ($sz bytes)"
+              fi
+            fi
+          done < <(git ls-files -z)
+          if [ -n "$BAD" ]; then
+            echo "❌ Large binaries without LFS tracking:$BAD"
+            exit 1
+          fi
+          echo "✅ Binary asset audit passed"
+      - name: LFS inventory
+        run: |
+          git lfs ls-files
+          echo "---"
+          git lfs ls-files --size
