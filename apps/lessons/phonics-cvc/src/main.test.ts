@@ -173,8 +173,8 @@ describe('main.ts', () => {
     button.click();
     await new Promise(resolve => setTimeout(resolve, 10));
 
-    // Gate overlay should be removed; only the chunk-tray (also position:fixed) remains.
-    expect(app.querySelectorAll('div[style*="position: fixed"]').length).toBe(1);
+    // Gate overlay should be removed; chunk-tray and mascot (both position:fixed) remain.
+    expect(app.querySelectorAll('div[style*="position: fixed"]').length).toBe(2);
 
     // Lesson UI should contain key classes and Swedish strings.
     expect(app.classList.contains('lesson-container')).toBe(true);

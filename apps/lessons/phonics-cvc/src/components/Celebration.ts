@@ -11,9 +11,18 @@
  *   celebration.destroy(); // on cleanup
  */
 
+import type { MascotInstance, MascotPose, MascotPhraseKey } from '../utils/mascot';
+import { pickPhrase } from '../utils/mascot';
+
+export interface CelebrationTriggerOptions {
+  mascot?: MascotInstance;
+  pose?: MascotPose;
+  phraseKey?: MascotPhraseKey;
+}
+
 export interface Celebration {
   element: HTMLElement;
-  trigger(): void;
+  trigger(options?: CelebrationTriggerOptions): void;
   destroy(): void;
 }
 
@@ -29,7 +38,7 @@ export function createCelebration(): Celebration {
   container.className = 'celebration';
   container.setAttribute('aria-hidden', 'true');
 
-  let cleanupTimer: ReturnType<typeof window.setTimeout> | null = null;
+  let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
 
   function clearBurst(): void {
     if (cleanupTimer) {
@@ -39,13 +48,23 @@ export function createCelebration(): Celebration {
     container.innerHTML = '';
   }
 
-  function trigger(): void {
+  function trigger(options?: CelebrationTriggerOptions): void {
     // Guard for motion-sensitive users
     if (
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
       return;
+    }
+
+    // Optional mascot integration
+    if (options?.mascot) {
+      options.mascot.setPose(options.pose ?? 'cheer');
+      const phraseKey = options.phraseKey ?? 'celebrate';
+      const phrase = pickPhrase(phraseKey);
+      if (phrase) {
+        options.mascot.setSpeech(phrase);
+      }
     }
 
     clearBurst();

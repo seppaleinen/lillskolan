@@ -19,6 +19,7 @@ import { createSoundGlider } from './components/SoundGlider';
 import { createChunkTray } from './components/ChunkTray';
 import { createCompletionScreen } from './components/CompletionScreen';
 import { createCelebration } from './components/Celebration';
+import { createMascot } from './components/Mascot';
 import { createDragSession } from './drag/DragSession';
 import { WebAudioPhonemeEngine } from './audio/PhonemeEngine';
 import { playBlended } from './audio/BlendPlayer';
@@ -28,6 +29,7 @@ import { createReturnMessage } from './return-protocol';
 import { HUB_ORIGIN } from './config';
 import { toDisplayCase, type CaseMode } from './utils/displayCase';
 import type { PhonemeManifest, PhonemeChunk } from './types/phoneme-manifest';
+import { pickPhrase, poseFor } from './utils/mascot';
 
 let audioEngine: WebAudioPhonemeEngine | null = null;
 let manifest: PhonemeManifest | null = null;
@@ -179,6 +181,14 @@ function showLesson(container: HTMLElement): void {
   const celebration = createCelebration();
   container.appendChild(celebration.element);
 
+  // Skogslingan mascot — friendly forest sprite for encouragement.
+  const mascot = createMascot({ pose: 'idle' });
+  mascot.element.style.position = 'fixed';
+  mascot.element.style.bottom = '16px';
+  mascot.element.style.right = '16px';
+  mascot.element.style.zIndex = '1000';
+  container.appendChild(mascot.element);
+
   // Drag session — hit-tests the glider on drop.
   const dragSession = createDragSession({
     root: container,
@@ -278,7 +288,7 @@ function showLesson(container: HTMLElement): void {
     advanceButton.disabled = false;
 
     // Celebrate after the feedback flash (status line cleared, button enabled).
-    celebration.trigger();
+    celebration.trigger({ mascot, pose: 'cheer', phraseKey: 'stepComplete' });
 
     getLessonBridge().sendProgress({
       stepIndex: completedCount,
@@ -299,6 +309,22 @@ function showLesson(container: HTMLElement): void {
     const stars = machine.getStars();
     const accuracyPercent = Math.round(machine.getAverageAccuracy() * 100);
     const timeMs = performance.now() - lessonStartTime;
+
+    // Move celebration and mascot to document.body so they survive lessonRoot wipe.
+    // Both use fixed positioning and don't require lessonRoot as parent.
+    const celebrationEl = celebration.element;
+    const mascotEl = mascot.element;
+    if (celebrationEl.parentNode) {
+      celebrationEl.parentNode.removeChild(celebrationEl);
+    }
+    if (mascotEl.parentNode) {
+      mascotEl.parentNode.removeChild(mascotEl);
+    }
+    document.body.appendChild(celebrationEl);
+    document.body.appendChild(mascotEl);
+
+    // Final celebration with mascot — now visible on top of completion screen.
+    celebration.trigger({ mascot, pose: 'celebrate', phraseKey: 'celebrate' });
 
     lessonRoot.innerHTML = '';
     const screen = createCompletionScreen({
@@ -353,6 +379,7 @@ function showLesson(container: HTMLElement): void {
     tray.destroy();
     glider.destroy();
     celebration.destroy();
+    mascot.destroy();
   });
 }
 

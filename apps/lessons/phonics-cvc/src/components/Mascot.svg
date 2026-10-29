@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-hidden="true">
+  <defs>
+    <!-- Color palette: burnt orange #c9753a, forest green #2d5a27, cream #fdf6e3, amber #d4a017, dark brown #3d2914 -->
+  </defs>
+
+  <!-- IDLE POSE: Neutral stance, slight chest expansion for breathing -->
+  <symbol id="mascot-idle" viewBox="0 0 200 200">
+    <g class="mascot-layer mascot-layer--idle">
+      <!-- Body (burnt orange) -->
+      <ellipse cx="100" cy="110" rx="50" ry="60" fill="#c9753a"/>
+      <!-- Belly (cream) -->
+      <ellipse cx="100" cy="115" rx="30" ry="40" fill="#fdf6e3"/>
+      <!-- Head (burnt orange) -->
+      <circle cx="100" cy="60" r="35" fill="#c9753a"/>
+      <!-- Face (cream) -->
+      <ellipse cx="100" cy="65" rx="22" ry="18" fill="#fdf6e3"/>
+      <!-- Eyes (dark brown) -->
+      <circle cx="90" cy="58" r="4" fill="#3d2914"/>
+      <circle cx="110" cy="58" r="4" fill="#3d2914"/>
+      <!-- Nose (dark brown) -->
+      <ellipse cx="100" cy="68" rx="5" ry="3" fill="#3d2914"/>
+      <!-- Smile -->
+      <path d="M 92 75 Q 100 80 108 75" stroke="#3d2914" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Ears (burnt orange) -->
+      <ellipse cx="70" cy="40" rx="10" ry="15" fill="#c9753a"/>
+      <ellipse cx="130" cy="40" rx="10" ry="15" fill="#c9753a"/>
+      <!-- Inner ears (cream) -->
+      <ellipse cx="70" cy="40" rx="5" ry="8" fill="#fdf6e3"/>
+      <ellipse cx="130" cy="40" rx="5" ry="8" fill="#fdf6e3"/>
+      <!-- Arms (neutral position) -->
+      <ellipse cx="60" cy="110" rx="12" ry="20" fill="#c9753a"/>
+      <ellipse cx="140" cy="110" rx="12" ry="20" fill="#c9753a"/>
+      <!-- Legs -->
+      <ellipse cx="85" cy="160" rx="12" ry="18" fill="#c9753a"/>
+      <ellipse cx="115" cy="160" rx="12" ry="18" fill="#c9753a"/>
+      <!-- Tail (curled) -->
+      <path d="M 55 130 Q 40 120 45 100 Q 50 90 60 95" stroke="#c9753a" stroke-width="14" fill="none" stroke-linecap="round"/>
+    </g>
+  </symbol>
+
+  <!-- CHEER POSE: Arms raised high, big smile -->
+  <symbol id="mascot-cheer" viewBox="0 0 200 200">
+    <g class="mascot-layer mascot-layer--cheer">
+      <!-- Body (burnt orange) -->
+      <ellipse cx="100" cy="110" rx="50" ry="60" fill="#c9753a"/>
+      <!-- Belly (cream) -->
+      <ellipse cx="100" cy="115" rx="30" ry="40" fill="#fdf6e3"/>
+      <!-- Head (burnt orange) -->
+      <circle cx="100" cy="60" r="35" fill="#c9753a"/>
+      <!-- Face (cream) -->
+      <ellipse cx="100" cy="65" rx="22" ry="18" fill="#fdf6e3"/>
+      <!-- Eyes (dark brown) - happy closed -->
+      <path d="M 85 58 Q 90 62 95 58" stroke="#3d2914" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M 105 58 Q 110 62 115 58" stroke="#3d2914" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Nose (dark brown) -->
+      <ellipse cx="100" cy="68" rx="5" ry="3" fill="#3d2914"/>
+      <!-- Big smile -->
+      <path d="M 88 73 Q 100 85 112 73" stroke="#3d2914" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Ears (burnt orange) -->
+      <ellipse cx="70" cy="40" rx="10" ry="15" fill="#c9753a"/>
+      <ellipse cx="130" cy="40" rx="10" ry="15" fill="#c9753a"/>
+      <!-- Inner ears (cream) -->
+      <ellipse cx="70" cy="40" rx="5" ry="8" fill="#fdf6e3"/>
+      <ellipse cx="130" cy="40" rx="5" ry="8" fill="#fdf6e3"/>
+      <!-- Arms (raised high) -->
+      <ellipse cx="65" cy="75" rx="10" ry="22" fill="#c9753a" transform="rotate(-30 65 75)"/>
+      <ellipse cx="135" cy="75" rx="10" ry="22" fill="#c9753a" transform="rotate(30 135 75)"/>
+      <!-- Legs (jumping) -->
+      <ellipse cx="85" cy="165" rx="12" ry="18" fill="#c9753a"/>
+      <ellipse cx="115" cy="165" rx="12" ry="18" fill="#c9753a"/>
+      <!-- Tail (wagging) -->
+      <path d="M 55 130 Q 35 115 40 95 Q 45 85 55 90" stroke="#c9753a" stroke-width="14" fill="none" stroke-linecap="round"/>
+    </g>
+  </symbol>
+
+  <!-- CELEBRATE POSE: Arms wide, jumping pose -->
+  <symbol id="mascot-celebrate" viewBox="0 0 200 200">
+    <g class="mascot-layer mascot-layer--celebrate">
+      <!-- Body (burnt orange) -->
+      <ellipse cx="100" cy="105" rx="50" ry="60" fill="#c9753a"/>
+      <!-- Belly (cream) -->
+      <ellipse cx="100" cy="110" rx="30" ry="40" fill="#fdf6e3"/>
+      <!-- Head (burnt orange) -->
+      <circle cx="100" cy="55" r="35" fill="#c9753a"/>
+      <!-- Face (cream) -->
+      <ellipse cx="100" cy="60" rx="22" ry="18" fill="#fdf6e3"/>
+      <!-- Eyes (dark brown) - excited open -->
+      <circle cx="90" cy="53" r="5" fill="#3d2914"/>
+      <circle cx="110" cy="53" r="5" fill="#3d2914"/>
+      <!-- Eye sparkles -->
+      <circle cx="92" cy="51" r="2" fill="#ffffff"/>
+      <circle cx="112" cy="51" r="2" fill="#ffffff"/>
+      <!-- Nose (dark brown) -->
+      <ellipse cx="100" cy="63" rx="5" ry="3" fill="#3d2914"/>
+      <!-- Open smile (excited) -->
+      <ellipse cx="100" cy="75" rx="8" ry="6" fill="#3d2914"/>
+      <!-- Ears (burnt orange) -->
+      <ellipse cx="65" cy="35" rx="10" ry="15" fill="#c9753a"/>
+      <ellipse cx="135" cy="35" rx="10" ry="15" fill="#c9753a"/>
+      <!-- Inner ears (cream) -->
+      <ellipse cx="65" cy="35" rx="5" ry="8" fill="#fdf6e3"/>
+      <ellipse cx="135" cy="35" rx="5" ry="8" fill="#fdf6e3"/>
+      <!-- Arms (wide open) -->
+      <ellipse cx="50" cy="105" rx="12" ry="20" fill="#c9753a" transform="rotate(-20 50 105)"/>
+      <ellipse cx="150" cy="105" rx="12" ry="20" fill="#c9753a" transform="rotate(20 150 105)"/>
+      <!-- Legs (jumping apart) -->
+      <ellipse cx="80" cy="165" rx="12" ry="18" fill="#c9753a"/>
+      <ellipse cx="120" cy="165" rx="12" ry="18" fill="#c9753a"/>
+      <!-- Tail (straight up) -->
+      <path d="M 55 125 Q 50 100 55 85 Q 60 75 70 80" stroke="#c9753a" stroke-width="14" fill="none" stroke-linecap="round"/>
+    </g>
+  </symbol>
+
+  <!-- THINKING POSE: Hand on chin, head tilted -->
+  <symbol id="mascot-thinking" viewBox="0 0 200 200">
+    <g class="mascot-layer mascot-layer--thinking">
+      <!-- Body (burnt orange) -->
+      <ellipse cx="105" cy="110" rx="50" ry="60" fill="#c9753a"/>
+      <!-- Belly (cream) -->
+      <ellipse cx="105" cy="115" rx="30" ry="40" fill="#fdf6e3"/>
+      <!-- Head (burnt orange) - tilted -->
+      <g transform="rotate(-10 105 60)">
+        <circle cx="105" cy="60" r="35" fill="#c9753a"/>
+        <!-- Face (cream) -->
+        <ellipse cx="105" cy="65" rx="22" ry="18" fill="#fdf6e3"/>
+        <!-- Eyes (dark brown) - looking up -->
+        <circle cx="95" cy="55" r="4" fill="#3d2914"/>
+        <circle cx="115" cy="55" r="4" fill="#3d2914"/>
+        <!-- Nose (dark brown) -->
+        <ellipse cx="105" cy="68" rx="5" ry="3" fill="#3d2914"/>
+        <!-- Small smile (thinking) -->
+        <path d="M 97 78 Q 105 82 113 78" stroke="#3d2914" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Ears (burnt orange) -->
+        <ellipse cx="75" cy="40" rx="10" ry="15" fill="#c9753a"/>
+        <ellipse cx="135" cy="40" rx="10" ry="15" fill="#c9753a"/>
+        <!-- Inner ears (cream) -->
+        <ellipse cx="75" cy="40" rx="5" ry="8" fill="#fdf6e3"/>
+        <ellipse cx="135" cy="40" rx="5" ry="8" fill="#fdf6e3"/>
+      </g>
+      <!-- Arm on chin (thinking gesture) -->
+      <ellipse cx="125" cy="110" rx="12" ry="20" fill="#c9753a" transform="rotate(-45 125 110)"/>
+      <!-- Other arm (neutral) -->
+      <ellipse cx="70" cy="115" rx="12" ry="20" fill="#c9753a"/>
+      <!-- Legs -->
+      <ellipse cx="90" cy="160" rx="12" ry="18" fill="#c9753a"/>
+      <ellipse cx="120" cy="160" rx="12" ry="18" fill="#c9753a"/>
+      <!-- Tail (curled tight) -->
+      <path d="M 60 130 Q 45 125 50 110 Q 55 100 65 105" stroke="#c9753a" stroke-width="14" fill="none" stroke-linecap="round"/>
+    </g>
+  </symbol>
+</svg>
