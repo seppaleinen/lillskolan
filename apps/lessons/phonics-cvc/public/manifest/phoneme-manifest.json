@@ -13,7 +13,8 @@
           "chunks": [
             {
               "text": "b",
-              "clip": "b"
+              "clip": "b_i",
+              "onsetContext": "i"
             },
             {
               "text": "il",
@@ -35,7 +36,8 @@
           "chunks": [
             {
               "text": "b",
-              "clip": "b"
+              "clip": "b_i",
+              "onsetContext": "i"
             },
             {
               "text": "i",
@@ -61,7 +63,8 @@
           "chunks": [
             {
               "text": "h",
-              "clip": "h"
+              "clip": "h_u",
+              "onsetContext": "u"
             },
             {
               "text": "us",
@@ -83,7 +86,8 @@
           "chunks": [
             {
               "text": "h",
-              "clip": "h"
+              "clip": "h_u",
+              "onsetContext": "u"
             },
             {
               "text": "u",
@@ -109,7 +113,8 @@
           "chunks": [
             {
               "text": "s",
-              "clip": "s"
+              "clip": "s_a",
+              "onsetContext": "a"
             },
             {
               "text": "ak",
@@ -131,7 +136,8 @@
           "chunks": [
             {
               "text": "s",
-              "clip": "s"
+              "clip": "s_a",
+              "onsetContext": "a"
             },
             {
               "text": "a",
@@ -157,7 +163,8 @@
           "chunks": [
             {
               "text": "m",
-              "clip": "m"
+              "clip": "m_a",
+              "onsetContext": "a"
             },
             {
               "text": "an",
@@ -179,7 +186,8 @@
           "chunks": [
             {
               "text": "m",
-              "clip": "m"
+              "clip": "m_a",
+              "onsetContext": "a"
             },
             {
               "text": "a",
@@ -205,7 +213,8 @@
           "chunks": [
             {
               "text": "t",
-              "clip": "t"
+              "clip": "t_i",
+              "onsetContext": "i"
             },
             {
               "text": "id",
@@ -227,7 +236,8 @@
           "chunks": [
             {
               "text": "t",
-              "clip": "t"
+              "clip": "t_i",
+              "onsetContext": "i"
             },
             {
               "text": "i",
@@ -253,7 +263,8 @@
           "chunks": [
             {
               "text": "n",
-              "clip": "n"
+              "clip": "n_ä",
+              "onsetContext": "ä"
             },
             {
               "text": "ät",
@@ -275,7 +286,8 @@
           "chunks": [
             {
               "text": "n",
-              "clip": "n"
+              "clip": "n_ä",
+              "onsetContext": "ä"
             },
             {
               "text": "ä",
@@ -301,7 +313,8 @@
           "chunks": [
             {
               "text": "s",
-              "clip": "s"
+              "clip": "s_ä",
+              "onsetContext": "ä"
             },
             {
               "text": "äl",
@@ -323,7 +336,8 @@
           "chunks": [
             {
               "text": "s",
-              "clip": "s"
+              "clip": "s_ä",
+              "onsetContext": "ä"
             },
             {
               "text": "ä",
@@ -349,7 +363,8 @@
           "chunks": [
             {
               "text": "s",
-              "clip": "s"
+              "clip": "s_o",
+              "onsetContext": "o"
             },
             {
               "text": "ol",
@@ -371,7 +386,8 @@
           "chunks": [
             {
               "text": "s",
-              "clip": "s"
+              "clip": "s_o",
+              "onsetContext": "o"
             },
             {
               "text": "o",
