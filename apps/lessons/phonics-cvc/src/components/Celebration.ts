@@ -38,7 +38,7 @@ export function createCelebration(): Celebration {
   container.className = 'celebration';
   container.setAttribute('aria-hidden', 'true');
 
-  let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
+  let cleanupTimer: number | null = null;
 
   function clearBurst(): void {
     if (cleanupTimer) {

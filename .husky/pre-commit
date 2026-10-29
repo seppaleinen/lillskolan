@@ -1,15 +1,41 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Get changed packages from staged files
-CHANGED=$(git diff --cached --name-only | grep -E '^(apps/|packages/)' | cut -d'/' -f1,2 | sort -u)
+# Map paths to package names
+path_to_pkg() {
+  case "$1" in
+    apps/hub*) echo "lillskolan-hub" ;;
+    apps/lessons/phonics-cvc*) echo "phonics-cvc" ;;
+    packages/lesson-sdk*) echo "@lillskolan/lesson-sdk" ;;
+    *) echo "" ;;
+  esac
+}
 
-if [ -n "$CHANGED" ]; then
+# Get changed packages from staged files
+# Use awk to get first 3 path components
+CHANGED_PATHS=$(git diff --cached --name-only | grep -E '^(apps/|packages/)' | awk -F'/' '{print $1"/"$2"/"$3}' | sort -u)
+
+if [ -n "$CHANGED_PATHS" ]; then
   echo "Running typecheck + tests on changed packages..."
-  for PKG in $CHANGED; do
-    echo "  → $PKG"
-    pnpm --filter "$PKG" typecheck && pnpm --filter "$PKG" test || exit 1
+  
+  CHANGED_PKGS=""
+  for path in $CHANGED_PATHS; do
+    pkg=$(path_to_pkg "$path")
+    if [ -n "$pkg" ]; then
+      CHANGED_PKGS="$CHANGED_PKGS $pkg"
+    fi
   done
+  
+  # Deduplicate
+  CHANGED_PKGS=$(echo $CHANGED_PKGS | tr ' ' '\n' | sort -u | tr '\n' ' ')
+  
+  if [ -n "$CHANGED_PKGS" ]; then
+    for PKG in $CHANGED_PKGS; do
+      echo "  → $PKG"
+      pnpm --filter "$PKG" typecheck && pnpm --filter "$PKG" test || exit 1
+    done
+  fi
+  
   echo "✅ Pre-commit checks passed"
 else
   echo "No package changes detected, skipping pre-commit checks"

@@ -9,8 +9,7 @@ if (typeof (globalThis as { PointerEvent?: unknown }).PointerEvent === 'undefine
       this.pointerId = init.pointerId ?? 1;
     }
   }
-  // @ts-expect-error - polyfill global
-  globalThis.PointerEvent = PointerEventPolyfill as unknown as typeof PointerEvent;
+  (globalThis as any).PointerEvent = PointerEventPolyfill as unknown as typeof PointerEvent;
 }
 
 import { createChunkTray, type TileOption } from '../components/ChunkTray';

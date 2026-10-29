@@ -73,10 +73,8 @@ class MockAudioContext {
 const mockFetch = vi.fn();
 
 function setupMocks() {
-  // @ts-expect-error - mocking global AudioContext
-  global.AudioContext = MockAudioContext;
-  // @ts-expect-error - mocking global fetch
-  global.fetch = mockFetch;
+  global.AudioContext = MockAudioContext as any;
+  global.fetch = mockFetch as any;
 
   MockAudioContext.resetCreatedSources();
   mockFetch.mockReset();
@@ -87,10 +85,8 @@ function setupMocks() {
 }
 
 function teardownMocks() {
-  // @ts-expect-error
-  delete global.AudioContext;
-  // @ts-expect-error
-  delete global.fetch;
+  delete (global as any).AudioContext;
+  delete (global as any).fetch;
   vi.restoreAllMocks();
 }
 

@@ -60,7 +60,7 @@ describe('createDragSession', () => {
     // pointermove should create the ghost.
     document.dispatchEvent(makePointerEvent('pointermove', { clientX: 100, clientY: 200, pointerId: 5 }));
 
-    const ghost = document.querySelector('.drag-ghost');
+    const ghost = document.querySelector('.drag-ghost') as HTMLElement | null;
     expect(ghost).not.toBeNull();
     expect(ghost?.style.left).toBe('100px');
     expect(ghost?.style.top).toBe('200px');
