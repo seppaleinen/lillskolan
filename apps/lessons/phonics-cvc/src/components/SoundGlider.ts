@@ -35,8 +35,8 @@ export function createSoundGlider(
   container.style.justifyContent = 'center';
   container.style.alignItems = 'center';
   container.style.gap = '1rem';
-  container.style.padding = '1rem';
-  container.style.minHeight = '120px';
+  container.style.padding = '0.5rem';
+  container.style.minHeight = '100px';
 
   let slots: HTMLElement[] = [];
 

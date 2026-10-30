@@ -52,7 +52,7 @@ export function createChunkTray(
   container.style.alignItems = 'center';
   container.style.flexWrap = 'wrap'; // adapts to 4-6 tiles without squeezing below 88px
   container.style.gap = '1rem';
-  container.style.padding = '1rem';
+  container.style.padding = '0.75rem';
   container.style.maxWidth = '100%';
   container.style.overflowX = 'auto'; // narrow screens: scroll horizontally, never shrink tiles
   container.style.background = 'rgba(255, 255, 255, 0.95)';

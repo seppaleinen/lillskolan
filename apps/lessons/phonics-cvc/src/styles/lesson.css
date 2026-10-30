@@ -8,8 +8,8 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   max-width: 600px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
-  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px) + 100px);
+  padding: 0.25rem 1rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px) + 88px);
   text-align: center;
   background: #f8f9fa;
   min-height: 100vh;
@@ -24,7 +24,7 @@
 .lesson-container h1 {
   font-size: 2rem;
   color: #4a90d9;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 /* Word display */
@@ -32,8 +32,8 @@
   font-size: 3rem;
   font-weight: bold;
   color: #333;
-  margin: 0.5rem 0;
-  padding: 0.5rem 1rem;
+  margin: 0.25rem 0;
+  padding: 0.25rem 1rem;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -43,14 +43,14 @@
 .pass-indicator {
   font-size: 1.2rem;
   color: #666;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.125rem;
 }
 
 /* Step counter */
 .step-counter {
   font-size: 1rem;
   color: #888;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.125rem;
 }
 
 /* Status line (blend status etc.) */
@@ -58,14 +58,14 @@
   font-size: 1.1rem;
   color: #4a90d9;
   min-height: 1.2em;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.125rem;
 }
 
 /* Sound glider */
 .sound-glider {
   width: 100%;
   max-width: 400px;
-  margin: 0.5rem auto;
+  margin: 0.25rem auto;
 }
 
 .glider-slot {
@@ -133,7 +133,7 @@
 
 /* Advance button */
 .btn-step {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   font-size: 1.1rem;
   font-weight: bold;
   font-family: inherit;
@@ -144,7 +144,7 @@
   cursor: pointer;
   touch-action: none;
   transition: background 0.15s ease;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .btn-step:hover:not(:disabled) {
@@ -225,6 +225,16 @@
   }
 }
 
+@media (min-width: 768px) and (max-width: 1024px) {
+  .lesson-container {
+    padding: 0.25rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px) + 88px);
+  }
+  .chunk-tray {
+    padding: 0.75rem 1rem;
+  }
+}
+
 /* Celebration - confetti and shooting stars */
 .celebration {
   position: fixed;
@@ -245,6 +255,8 @@
   box-shadow: 0 0 8px var(--star-color), 0 0 16px var(--star-color);
   animation: star-fly var(--star-duration) ease-out var(--star-delay) forwards;
   opacity: 0;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .celebration .confetti {
@@ -257,6 +269,8 @@
   animation: confetti-fall var(--confetti-duration) ease-out var(--confetti-delay) forwards;
   opacity: 0;
   transform: rotate(var(--confetti-rotation));
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 @keyframes star-fly {
