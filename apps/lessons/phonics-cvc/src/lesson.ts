@@ -97,12 +97,36 @@ function showLesson(container: HTMLElement): void {
   header.textContent = 'Läsläs: CVC';
   container.appendChild(header);
 
-  // Word display
+  // Word display + speaker button
+  const wordSection = document.createElement('div');
+  wordSection.className = 'word-section';
+  wordSection.style.display = 'flex';
+  wordSection.style.alignItems = 'center';
+  wordSection.style.justifyContent = 'center';
+  wordSection.style.gap = '0.5rem';
+  container.appendChild(wordSection);
+
   const wordDisplay = document.createElement('div');
   wordDisplay.className = 'word-display';
-  container.appendChild(wordDisplay);
   wordDisplay.style.cursor = 'pointer';
-  wordDisplay.addEventListener('click', async () => {
+  wordSection.appendChild(wordDisplay);
+
+  // Speaker button — visible replay affordance next to the word.
+  const speakerBtn = document.createElement('button');
+  speakerBtn.className = 'speaker-btn';
+  speakerBtn.textContent = '🔊';
+  speakerBtn.style.background = 'none';
+  speakerBtn.style.border = 'none';
+  speakerBtn.style.cursor = 'pointer';
+  speakerBtn.style.fontSize = '1.5rem';
+  speakerBtn.style.padding = '0.25rem 0.5rem';
+  speakerBtn.style.borderRadius = '8px';
+  speakerBtn.style.color = '#4a90d9';
+  speakerBtn.style.touchAction = 'none';
+  speakerBtn.setAttribute('aria-label', 'Läss ordet');
+  wordSection.appendChild(speakerBtn);
+
+  async function replayWord(): Promise<void> {
     if (!machine || !audioEngine || !audioEngine.isReady()) return;
     const stepState = machine.getCurrentStep();
     try {
@@ -114,7 +138,10 @@ function showLesson(container: HTMLElement): void {
     } finally {
       statusLine.textContent = '';
     }
-  });
+  }
+
+  wordDisplay.addEventListener('click', () => { void replayWord(); });
+  speakerBtn.addEventListener('click', () => { void replayWord(); });
 
   // Pass indicator
   const passIndicator = document.createElement('div');
@@ -242,16 +269,19 @@ function showLesson(container: HTMLElement): void {
       // wrong slot.
       glider.markSlotFilled(result.slot, droppedChunk);
       tray.setAvailable(tileIndex, false);
-      if (audioEngine?.isReady()) {
+
+      if (machine.isStepComplete()) {
+        // Blended playback of the whole word takes priority — do NOT also fire
+        // the individual chunk clip for the last drop.
+        onStepComplete();
+      } else if (audioEngine?.isReady()) {
         try {
+          // Stop any in-flight clip so two chunk plays never overlap.
+          audioEngine.stop();
           audioEngine.play(droppedChunk.clip);
         } catch {
           // Clip missing — ignore.
         }
-      }
-
-      if (machine.isStepComplete()) {
-        onStepComplete();
       }
     } else {
       // Wrong tile: shake the tray tile, no audio, no lock.
